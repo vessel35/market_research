@@ -1,0 +1,15 @@
+{
+  "_note": "research_db는 READ-ONLY 역할(RESEARCH_DB_RO_URL)이다. Phase 4는 DB에 쓰지 않는다 — 스키마 확인, SPEC.md와 실제 스키마 일치 확인, lifecycle_status 조회, Phase 3용 조회 SQL 초안 작성만 한다. 읽기 전용은 DB 역할 권한으로 강제한다: 역할에 SELECT만 부여하고 INSERT/UPDATE/DELETE/DDL은 권한에서 막는다. strategy-discovery의 쓰기 역할과 정반대다. 패키지 버전 고정(perf-audit 2026-06-05 P005).",
+  "mcpServers": {
+    "research_db": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-postgres@0.6.2"],
+      "env": { "DATABASE_URL": "${RESEARCH_DB_RO_URL}" }
+    },
+    "perplexity": {
+      "command": "npx",
+      "args": ["-y", "@perplexity-ai/mcp-server@0.9.0"],
+      "env": { "PERPLEXITY_API_KEY": "${PERPLEXITY_API_KEY}" }
+    }
+  }
+}

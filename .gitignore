@@ -1,0 +1,22 @@
+# Local Claude Code overrides / secrets (never commit)
+.claude/settings.local.json
+*.local.json
+.env
+.env.*
+!.env.example
+*.key
+*.pem
+*.p12
+*.keystore
+secrets/
+credentials/
+
+# OS / editor
+.DS_Store
+*.swp
+*~
+
+# Python
+__pycache__/
+*.pyc
+.ipynb_checkpoints/

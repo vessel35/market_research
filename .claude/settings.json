@@ -1,0 +1,72 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+
+  "model": "opus",
+  "_model_note": "Main session = ORCHESTRATOR / regime-architect on Opus 4.8 — it drives the sequence, scores the framework selection matrix, picks the ONE primary framework, and authors the Stage A spec documents. Subagents override via their own model: frontmatter. Reasoning-heavy nodes (causal-auditor, prediction-researcher) run on Opus 4.8 (+xhigh / +high); the rest on Sonnet. Pin exact IDs for reproducibility: claude-opus-4-8, claude-sonnet-4-6.",
+
+  "effortLevel": "xhigh",
+  "_effort_note": "Main session (orchestrator) runs at xhigh — Opus 4.8 supports it (max/ultracode are session-only and cannot go here; xhigh can). Subagents set their own effort in frontmatter and override this default: framework-scout medium, data-agent/completeness-auditor high, causal-auditor xhigh, prediction-researcher high.",
+
+  "disableAgentView": true,
+  "_view_note": "멀티 서브에이전트 dispatch이지만 --dangerously-skip-permissions가 dispatched bg session으로 전파되는 P0 위험을 피하려고 Agent View를 끈다. 정책상 필요하면 해제.",
+
+  "enabledPlugins": {
+    "claude-mem@thedotmack": false
+  },
+  "_plugins_note": "claude-mem은 PostToolUse matcher '*'로 모든 도구 호출마다 프로세스를 띄운다. 다회 fan-out 연구에서는 끈다(전역·타 프로젝트 영향 없음). perf-audit 2026-06-05 항목 2.",
+
+  "permissions": {
+    "allow": [
+      "Bash(git status)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch)",
+      "Bash(git show:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(head:*)",
+      "Bash(tail:*)",
+      "Bash(wc:*)",
+      "Bash(find:*)",
+      "Bash(rg:*)",
+      "Bash(jq:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(rm -fr:*)",
+      "Bash(sudo:*)",
+      "Bash(curl:*)",
+      "Bash(wget:*)",
+      "Bash(nc:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(psql:*)",
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(npm publish:*)",
+      "Bash(pip install:*)",
+      "Bash(docker:*)",
+      "Bash(kubectl:*)"
+    ]
+  },
+
+  "hooks": {
+    "SessionStart": [
+      { "hooks": [ { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/guardrails.sh" } ] }
+    ],
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|MultiEdit",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/write-scope.sh" }
+        ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          { "type": "command", "command": "$CLAUDE_PROJECT_DIR/.claude/hooks/isolation-guard.sh" }
+        ]
+      }
+    ]
+  }
+}
