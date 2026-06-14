@@ -2,7 +2,7 @@
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m
 **Run:** reports/phase4_market_regime/20260613_0558/ · **Date:** 2026-06-13
-**Mode:** SPEC-ONLY (no OHLCV/optional data loaded; `regime_labels.csv` waived). This document
+**Mode:** Framework survey + selection (methodology); the selected classifier was later executed on real OHLCV (labels generated 2026-06-14). This document
 defines the framework survey and selection; it uses public theory only — **no Phase 2/3 input**.
 
 ## 0. Method and isolation

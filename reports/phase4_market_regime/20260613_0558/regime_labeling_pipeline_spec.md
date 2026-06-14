@@ -2,14 +2,15 @@
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
 **Classifier:** `phase4_trendstrength` `phase4_specA_v1` · **Primary labeling method:** causal.
-**Mode:** SPEC-ONLY — pipeline fully specified; **not executed** (no OHLCV). `regime_labels.csv`
-not produced this run.
+**Mode:** DATA-PRESENT — pipeline fully specified **and executed** on real OHLCV (2026-06-14);
+`regime_labels.csv` generated (210,528 rows). See `phase4_final_report.md` §35.14 and
+`validation_results.md`.
 
 ## 1. Raw data input
 
 ETH/USDT 5m OHLCV (`timestamp, open, high, low, close, volume`), Binance USDT-M perpetual,
 UTC, 5-minute spacing. Optional data (funding/OI/taker) not required and absent this run.
-`source_data_path` recorded in the manifest and label rows (`none (spec-only)` this run).
+`source_data_path` recorded in the manifest and label rows (this run: `/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv`).
 
 ## 2. Data-quality validation (skill §8a / prompt §18) — run before any labeling
 
@@ -18,9 +19,9 @@ OHLC valid (high ≥ max(open,close), low ≤ min(open,close), high ≥ low); no
 zero-volume and extreme-spike bars flagged; data start/end confirmed; optional-data coverage
 measured; timezone (UTC) confirmed; feature availability vs live timing checked. **Fatal** issues
 (out-of-order/duplicate timestamps, broken OHLC) → NO labels produced. **Correctable** issues →
-documented with method + impact in `data_quality_report.md`. **This run (methodology-only):** no data → these checks are out of scope (data-dependent), not a
-deficiency; `data_quality_report.md` not produced and `data_quality_score` left null. Run them
-when OHLCV is present.
+documented with method + impact in `data_quality_report.md`. **This run:** data-quality checks were RUN — verdict PASS (0 duplicate/gap/OHLC violations; 21
+zero-volume + 9 spike bars documented, retained); see `data_quality_report.md`. `data_quality_score`
+left null in the labels (per-bar QC scoring not part of this classifier_version).
 
 ## 3. Feature calculation (bars ≤ t)
 
@@ -49,7 +50,7 @@ For each bar t, emit `regime` ∈ {strong_up, strong_down, transition, volatile,
 
 Schema and value rules per `regime_labels_schema.md` (20 columns; `regime_labeling=causal`;
 `llm_discretion_used=false`; no strategy-performance columns). Written under the run dir only.
-**This run:** not produced (no data). When data is present, one row per 5m bar from `warmup_end`.
+**This run:** GENERATED — 210,528 rows (301 warmup, 210,227 labeled), one row per 5m bar.
 
 ## 8. Phase 3 trade-join algorithm (Phase 3 performs; Phase 4 specifies)
 

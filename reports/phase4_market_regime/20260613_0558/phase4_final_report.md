@@ -406,6 +406,15 @@ timestamp` on all rows; first 288 rows `unknown_or_warmup`.
 confirmed; indicators bars ≤ t only; isolation held).
 
 **Convention note:** the implemented ATR percentile uses pandas
-`rolling(2016,min_periods=288).rank(pct=True)` (count/len) — a <0.04% tie-convention difference
-from the spec's `(count−1)/(len−1)`; both strictly trailing and causal (classifier spec §8). The
-effective warmup is 301 bars (vol_score needs 288 ATR values).
+`rolling(2016,min_periods=288).rank(pct=True)` (count/len) — declared the canonical convention for
+`phase4_specA_v1` (a <0.04% difference from the illustrative `(count−1)/(len−1)`; both strictly
+trailing and causal — classifier spec §8). Effective warmup is 301 bars (vol_score needs 288 ATR
+values).
+
+**Reproducibility & provenance:** `build_regime_labels.py` is CLI-parameterized
+(`--input/--outdir/--git-commit`) and runs from any clone. Regenerating to a temp dir reproduces
+`regime_labels.csv` **byte-identically** (sha256 `0a10b357…`) — determinism + refactor-safety
+proven. Extended tests (`validation_results.md` "Extended tests"): EMA vs pandas `ewm` (~0 diff),
+hand-verified Wilder ATR/+DI/−DI/DX, effective-warmup-301 direct assert, and boundary-stratified
+slice-invariance (ADX∈[24,26], vol∈[68,72]; 0 failures) — all PASS. Provenance (input/output
+sha256, commit lineage 6a721f5→67dc40e→d93b850, lib versions) in `provenance.json`.

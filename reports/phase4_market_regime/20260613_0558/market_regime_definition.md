@@ -29,7 +29,7 @@ state). This vocabulary is fixed by the SPEC and is not altered.
 
 ## 5. MarketRegime enum mapping
 
-This methodology-only phase maps to the canonical enum names directly; if a backtest service
+This phase maps to the canonical enum names directly; if a backtest service
 later exposes a concrete `MarketRegime` enum, Phase 3 reconciles names at integration time (not
 required here):
 

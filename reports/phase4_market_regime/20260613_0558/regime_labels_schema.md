@@ -1,10 +1,9 @@
 # regime_labels.csv Schema
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Status:** `regime_labels.csv` **not produced this run** (SPEC-ONLY, no OHLCV). This document is
-the authoritative schema + value-rule contract so the file can be generated identically when data
-is present, and so Phase 3 knows the exact columns. `regime_labeling=causal`;
-`llm_discretion_used=false`.
+**Status:** `regime_labels.csv` **generated** (210,528 rows; data-present run 2026-06-14). This
+document is the authoritative schema + value-rule contract; Phase 3 reads the CSV per this.
+`regime_labeling=causal`; `llm_discretion_used=false`.
 
 ## Columns (20, in order)
 
@@ -27,7 +26,7 @@ is present, and so Phase 3 knows the exact columns. `regime_labeling=causal`;
 | 15 | `data_quality_score` | float/null | null this run (data-quality checks not run; no data) |
 | 16 | `feature_snapshot_ref` | string/null | pointer to `feature_snapshot.parquet` row; null this run |
 | 17 | `classifier_version` | string | `phase4_specA_v1` |
-| 18 | `source_data_path` | string | OHLCV path; `none (spec-only)` this run |
+| 18 | `source_data_path` | string | OHLCV path (this run: trading-system/backtestdata/ETHUSDT_futures_5min.csv) |
 | 19 | `git_commit` | string | `n/a (not a git repo)` this run |
 | 20 | `llm_discretion_used` | bool | always `false`; a `true` value invalidates the row |
 
@@ -54,7 +53,7 @@ is present, and so Phase 3 knows the exact columns. `regime_labeling=causal`;
 These couple labels to strategy results or use future data; their presence is a hard failure of
 the look-ahead checklist. `usable_in_hybrid` is a Phase 3 concept, not a Phase 4 label column.
 
-## Example row (illustrative — NOT generated data; no OHLCV this run)
+## Example row (illustrative format; the real per-bar data is in `regime_labels.csv`)
 
 BEGIN_JSON
 {
@@ -75,8 +74,8 @@ BEGIN_JSON
   "data_quality_score": null,
   "feature_snapshot_ref": null,
   "classifier_version": "phase4_specA_v1",
-  "source_data_path": "none (spec-only)",
-  "git_commit": "n/a (not a git repo)",
+  "source_data_path": "/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv",
+  "git_commit": "6a721f5",
   "llm_discretion_used": false
 }
 END_JSON

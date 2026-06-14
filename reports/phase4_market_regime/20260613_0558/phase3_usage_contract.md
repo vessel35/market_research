@@ -4,16 +4,17 @@
 Phase 4 outputs are for Phase 3 ONLY; they are never used in Phase 2 and never modify Phase 2
 artifacts. `regime_labeling=causal`; `llm_discretion_used=false`.
 
-**Readiness:** this run is a methodology spec (no `regime_labels.csv` yet). Phase 3 may rely on
-this *contract/spec*, but must not draw regime-conditional conclusions or hybrid/no-trade
-decisions until the labels are generated and empirically validated (see `phase4_final_report.md`
-§35.13 — minimum acceptance criteria).
+**Readiness:** `regime_labels.csv` has been **generated and validated** on real ETH/USDT 5m OHLCV
+(210,528 rows; data-quality PASS; acceptance tests PASS; causal-auditor PASS — see
+`phase4_final_report.md` §35.13/§35.14). Phase 3 may consume it as the join source. Drawing
+regime-conditional conclusions and hybrid/no-trade decisions is Phase 3's task (using these causal
+labels); judging whether the thresholds are appropriate *for trading* is also Phase 3's.
 
 ## 1. Files Phase 3 reads
 
 From `reports/phase4_market_regime/20260613_0558/`:
-- `regime_labels.csv` — the causal per-bar labels (the join source). **Not produced this run**
-  (SPEC-ONLY, no data); when present it follows `regime_labels_schema.md` exactly.
+- `regime_labels.csv` — the causal per-bar labels (the join source). **Generated** (210,528 rows);
+  follows `regime_labels_schema.md` exactly.
 - `regime_labels_schema.md` — column + value contract (use until the CSV exists).
 - `market_regime_definition.md` — canonical regime meanings + the value to use for
   `edge_fragment.regime`.

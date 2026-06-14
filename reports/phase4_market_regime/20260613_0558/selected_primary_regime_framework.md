@@ -1,7 +1,8 @@
 # Selected Primary Regime Framework
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Mode:** SPEC-ONLY (no data; labels waived). Theory-grounded; `llm_discretion_used=false`.
+**Mode:** DATA-PRESENT (executed on real OHLCV 2026-06-14; labels generated + validated).
+Theory-grounded; `llm_discretion_used=false`.
 
 ## 1. Selected framework
 
@@ -85,9 +86,9 @@ for the survey but **excluded from the classifier** to honor the no-mixing princ
 ## 8. Threshold policy
 
 Priority per skill §15 / prompt §21.4: SPEC/existing-code → train-period percentile →
-walk-forward rolling percentile → fixed convention/theory. This is a methodology-only phase (no
-separate SPEC.md/code is required) and no data is loaded, so we fall to **fixed convention/SPEC
-values** (to be profiled against the data distribution later, never tuned to performance):
+walk-forward rolling percentile → fixed convention/theory. There is no separate SPEC.md/code, so
+we fall to **fixed convention/SPEC values** (now profiled against the data distribution post-hoc
+in §35.14, never tuned to performance):
 
 - **ADX trend gate = 25** — repository/SPEC value and a common TA convention for a strong trend
   (Wilder grounds the ADX trend-strength concept; 25 is convention, not a derived constant). To be
@@ -124,11 +125,12 @@ ever produced) live in separate files. Independently reviewed by `causal-auditor
   labels within causal 1h/4h structure).
 - The volatility split needs a trailing percentile that requires accumulated history to be
   meaningful; cold-start bars are low-confidence/warmup.
-- **Methodology-only phase:** `regime_labels.csv` and data-quality checks are out of scope
-  (data-dependent artifacts), not deficiencies; thresholds are fixed convention/SPEC values and would
-  be confirmed against train data (never tuned to performance) in a later data-present run.
-  SPEC.md is not required — the `regime-classification` skill is the canonical source by design;
-  the existing-classifier-vs-SPEC discrepancy check is not applicable (no existing classifier).
+- **Data-present run done:** `regime_labels.csv` generated + validated (data-quality PASS;
+  acceptance tests PASS; causal-auditor PASS). Thresholds (ADX=25, P70) are fixed convention/SPEC
+  values; the ETH/USDT 5m distribution is now profiled (§35.14) and the splits are sane, but their
+  appropriateness *for trading* is a Phase-3 question (never tuned to performance). SPEC.md is not
+  required — the `regime-classification` skill is the canonical source by design; the
+  existing-classifier-vs-SPEC discrepancy check is not applicable (no existing classifier).
 
 ## 12. Rejected alternatives held for future research
 

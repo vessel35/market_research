@@ -21,7 +21,7 @@ the label-dependent rows are now verified on the actual file.
 | exactly one primary framework | yes | exactly one `selected_as_primary=true` in `regime_framework_selection_matrix.csv` (TREND_STRENGTH_ADX_EMA_SPEC) | choose exactly one primary |
 | no arbitrary mixing | yes | only the framework's own ATR-percentile vol split (skill §3/§6); no other family's rules in the classifier; auditor check 4 PASS | remove any cross-family rule |
 | rejected frameworks documented | yes | 16 rejected candidates with `rejection_reason` in the matrix + `regime_framework_research.md` §3–§4 | document every rejection with a reason |
-| scaler fit train-only (if used) | n/a | no scaler used — rule-based classifier; no fit performed this run (no data) | if a scaler is ever added, fit on train split only |
+| scaler fit train-only (if used) | n/a | no scaler used — rule-based classifier; no fit performed (none needed) | if a scaler is ever added, fit on train split only |
 | threshold fit train-only (if adaptive) | n/a | thresholds are fixed convention/SPEC values (ADX=25, P70), not theory-derived constants; the percentile is a causal trailing statistic, not a train-only model fit and not tuned to performance; no fit performed this run | if adaptive thresholds are introduced, fit on train split only, never on test/performance |
 | clustering fit train-only (if used) | n/a | no clustering in the selected framework; statistical/clustering candidates rejected (hard gate) | if clustering is ever added, fit on train split only |
 | no Phase 2 result used | yes | no Phase 2 artifact (result.json/trades.csv/portfolio.csv/signals.csv/per-strategy metrics) read; isolation stated | remove any Phase 2 input |

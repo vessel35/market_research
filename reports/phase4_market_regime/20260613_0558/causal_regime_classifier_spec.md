@@ -1,8 +1,9 @@
 # Causal Regime Classifier Spec
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Classifier version:** `phase4_specA_v1` · **Mode:** SPEC-ONLY (spec authored; not executed — no
-data). All features use bars ≤ t. `llm_discretion_used=false`.
+**Classifier version:** `phase4_specA_v1` · **Mode:** DATA-PRESENT (spec authored AND executed on
+real OHLCV 2026-06-14; see §35.14 / `validation_results.md`). All features use bars ≤ t.
+`llm_discretion_used=false`.
 
 ## 1. Selected primary framework
 
@@ -90,9 +91,10 @@ history exist, the bar is treated as warmup (§9). The P70 cutoff is a fixed con
 train-only fit and not tuned to performance.
 
 **Implementation note (data-present run, 2026-06-14):** the percentile is computed with pandas
-`rolling(2016, min_periods=288).rank(pct=True)` (= count(window ≤ x)/len, average ties) — a
-negligible (<0.04%) difference from the `(count−1)/(len−1)` form above; both are strictly trailing
-(bars ≤ t) and causal. Effective warmup is **301 bars** (ATR(14) first valid ~bar 14, and
+`rolling(2016, min_periods=288).rank(pct=True)` (= count(window ≤ x)/len, average ties). **For
+classifier_version `phase4_specA_v1` this pandas convention is the canonical/authoritative
+definition**; the `(count−1)/(len−1)` line above is an equivalent illustration (they differ by
+<0.04% at W=2016). Both are strictly trailing (bars ≤ t) and causal. Effective warmup is **301 bars** (ATR(14) first valid ~bar 14, and
 `volatility_score` then needs `min_periods=288` further ATR values), slightly beyond the nominal
 `warmup_end=288`; the NaN-gate in §9 handles this correctly (those rows → `unknown_or_warmup`).
 
@@ -176,7 +178,7 @@ bar t usable only from t+1. (5) No centered rolling windows, no ZigZag/hindsight
 scaler/clustering/model fit (rule-based; no train fit). (7) Warmup bars flagged, never
 back-filled. (8) Smoothed/posthoc labels (if ever made) stay in separate files.
 
-## 15. Unit-test plan (per skill §33.2; NOT executed — no data this run)
+## 15. Unit-test plan (per skill §33.2) — EXECUTED 2026-06-14, all PASS (`validation_results.md`)
 
 1. strong_up: ADX=30, EMA9>EMA21>EMA55 → `strong_up`.
 2. strong_down: ADX=30, EMA9<EMA21<EMA55 → `strong_down`.
@@ -187,7 +189,7 @@ back-filled. (8) Smoothed/posthoc labels (if ever made) stay in separate files.
 7. boundary: ADX exactly 25 → trend branch (>= 25); volatility_score exactly 70 → `volatile`
    (>= 70). Document and freeze the inclusive-boundary convention.
 
-## 16. Slice-invariance test plan (per skill §33.3; NOT executed — no data this run)
+## 16. Slice-invariance test plan (per skill §33.3) — EXECUTED 2026-06-14, 40/40 PASS (`validation_results.md`)
 
 1. For any t ≤ T: `regime[t]` computed on `data[0:t+1]` equals `regime[t]` computed on
    `data[0:T+1]` (appending future bars must not change a past label).

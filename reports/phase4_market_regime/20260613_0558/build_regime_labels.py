@@ -8,18 +8,30 @@ Two Wilder RMA forms used per spec §6:
   - mean-seeded (S[P-1] = mean(X[0..P-1])) for ADX14, per spec §6 comment:
     'first ADX = mean(DX over first 14 DX values)'
 Both use the recursion S[t] = S[t-1] - S[t-1]/P + X[t] (alpha = 1/P).
+
+Usage
+-----
+  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv
+  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv \\
+      --outdir /path/to/run_dir --git-commit 6a721f5
+
+Environment variable shorthand:
+  PHASE4_OHLCV=/path/to/ETHUSDT_futures_5min.csv python build_regime_labels.py
+
+Defaults:
+  --outdir   : directory containing this script (Path(__file__).resolve().parent)
+  --git-commit : auto-detected via `git -C <outdir> rev-parse --short HEAD`,
+                 fallback "unknown"
 """
 
+import argparse
+import os
 import sys
 import subprocess
 import numpy as np
 import pandas as pd
 from pathlib import Path
 
-# ─── Paths ────────────────────────────────────────────────────────────────────
-OHLCV_PATH = "/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv"
-RUN_DIR = Path("/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558")
-REPO_DIR = "/home/vessel/workspace/CoinTrading/market-regime"
 
 # ─── Constants from spec ──────────────────────────────────────────────────────
 ADX_PERIOD = 14
@@ -34,21 +46,88 @@ SELECTED_FRAMEWORK = "TREND_STRENGTH_ADX_EMA_SPEC"
 SYMBOL = "ETH/USDT"
 TIMEFRAME = "5m"
 
-# ─── Git commit ───────────────────────────────────────────────────────────────
-try:
-    GIT_COMMIT = subprocess.check_output(
-        ["git", "-C", REPO_DIR, "rev-parse", "--short", "HEAD"],
-        stderr=subprocess.DEVNULL
-    ).decode().strip()
-except Exception:
-    GIT_COMMIT = "unknown"
+
+def parse_args():
+    """Parse CLI arguments. All computation paths use the returned namespace."""
+    parser = argparse.ArgumentParser(
+        description="Phase 4 Stage A — generate causal regime_labels.csv from OHLCV data.",
+        epilog=(
+            "Example:\n"
+            "  python build_regime_labels.py \\\n"
+            "      --input /data/ETHUSDT_futures_5min.csv \\\n"
+            "      --outdir /results/20260613_0558 \\\n"
+            "      --git-commit 6a721f5\n\n"
+            "Environment variable PHASE4_OHLCV is used as --input default if set."
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "--input",
+        default=os.environ.get("PHASE4_OHLCV"),
+        metavar="PATH",
+        help=(
+            "Path to OHLCV CSV file (required). "
+            "Defaults to PHASE4_OHLCV environment variable if set."
+        ),
+    )
+    parser.add_argument(
+        "--outdir",
+        default=None,
+        metavar="PATH",
+        help=(
+            "Output directory for all generated files. "
+            "Defaults to the directory containing this script."
+        ),
+    )
+    parser.add_argument(
+        "--git-commit",
+        default=None,
+        dest="git_commit",
+        metavar="SHA",
+        help=(
+            "Git commit SHA to embed in regime_labels.csv. "
+            "Defaults to auto-detection via `git -C <outdir> rev-parse --short HEAD`, "
+            "falling back to 'unknown'."
+        ),
+    )
+    args = parser.parse_args()
+
+    if args.input is None:
+        parser.error(
+            "--input is required (or set PHASE4_OHLCV environment variable)."
+        )
+
+    return args
+
+
+def resolve_paths(args):
+    """Resolve OHLCV_PATH, RUN_DIR, and GIT_COMMIT from parsed args."""
+    ohlcv_path = str(args.input)
+
+    if args.outdir is not None:
+        run_dir = Path(args.outdir).resolve()
+    else:
+        run_dir = Path(__file__).resolve().parent
+
+    if args.git_commit is not None:
+        git_commit = args.git_commit
+    else:
+        try:
+            git_commit = subprocess.check_output(
+                ["git", "-C", str(run_dir), "rev-parse", "--short", "HEAD"],
+                stderr=subprocess.DEVNULL,
+            ).decode().strip()
+        except Exception:
+            git_commit = "unknown"
+
+    return ohlcv_path, run_dir, git_commit
 
 
 # ═════════════════════════════════════════════════════════════════════════════
 # SECTION 1 — Data quality checks
 # ═════════════════════════════════════════════════════════════════════════════
 
-def run_data_quality(df_raw):
+def run_data_quality(df_raw, ohlcv_path, run_dir):
     """
     Run skill §8a checks. Return (is_fatal, report_lines, df_clean).
     df_clean has timestamps as pd.Timestamp UTC.
@@ -58,8 +137,8 @@ def run_data_quality(df_raw):
 
     lines.append("# Data Quality Report")
     lines.append("")
-    lines.append(f"**Source:** `{OHLCV_PATH}`")
-    lines.append(f"**Run dir:** `{RUN_DIR}`")
+    lines.append(f"**Source:** `{ohlcv_path}`")
+    lines.append(f"**Run dir:** `{run_dir}`")
     lines.append("")
 
     # ── Parse timestamps ──────────────────────────────────────────────────────
@@ -432,7 +511,7 @@ def compute_confidence(regime, adx, ema9, ema21, ema55, vol_score, atr14):
 # SECTION 4 — Build regime_labels.csv
 # ═════════════════════════════════════════════════════════════════════════════
 
-def build_labels(df: pd.DataFrame) -> pd.DataFrame:
+def build_labels(df: pd.DataFrame, ohlcv_path: str, git_commit: str) -> pd.DataFrame:
     """
     Build the causal regime labels for all bars.
     """
@@ -489,8 +568,8 @@ def build_labels(df: pd.DataFrame) -> pd.DataFrame:
                 "data_quality_score":         None,
                 "feature_snapshot_ref":       None,
                 "classifier_version":         CLASSIFIER_VERSION,
-                "source_data_path":           OHLCV_PATH,
-                "git_commit":                 GIT_COMMIT,
+                "source_data_path":           ohlcv_path,
+                "git_commit":                 git_commit,
                 "llm_discretion_used":        False,
             })
         else:
@@ -518,8 +597,8 @@ def build_labels(df: pd.DataFrame) -> pd.DataFrame:
                 "data_quality_score":         None,
                 "feature_snapshot_ref":       None,
                 "classifier_version":         CLASSIFIER_VERSION,
-                "source_data_path":           OHLCV_PATH,
-                "git_commit":                 GIT_COMMIT,
+                "source_data_path":           ohlcv_path,
+                "git_commit":                 git_commit,
                 "llm_discretion_used":        False,
             })
 
@@ -914,21 +993,25 @@ def build_validation_report(
 # ═════════════════════════════════════════════════════════════════════════════
 
 def main():
-    run_dir = RUN_DIR
+    args = parse_args()
+    ohlcv_path, run_dir, git_commit = resolve_paths(args)
+
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print("Phase 4 Stage A — data-present acceptance run")
-    print(f"Git commit: {GIT_COMMIT}")
+    print(f"OHLCV input:  {ohlcv_path}")
+    print(f"Output dir:   {run_dir}")
+    print(f"Git commit:   {git_commit}")
     print("")
 
     # ── Load raw data ─────────────────────────────────────────────────────────
     print("Loading OHLCV data...")
-    df_raw = pd.read_csv(OHLCV_PATH)
+    df_raw = pd.read_csv(ohlcv_path)
     print(f"  Loaded {len(df_raw):,} rows.")
 
     # ── Step 1: Data quality ──────────────────────────────────────────────────
     print("Running data-quality checks...")
-    fatal, dq_report, df = run_data_quality(df_raw)
+    fatal, dq_report, df = run_data_quality(df_raw, ohlcv_path, run_dir)
 
     dq_path = run_dir / "data_quality_report.md"
     dq_path.write_text(dq_report, encoding="utf-8")
@@ -940,7 +1023,7 @@ def main():
 
     # ── Step 2: Build labels ──────────────────────────────────────────────────
     print("Building regime labels...")
-    labels_df = build_labels(df)
+    labels_df = build_labels(df, ohlcv_path, git_commit)
     print(f"  Done. Total rows: {len(labels_df):,}")
 
     labels_path = run_dir / "regime_labels.csv"
