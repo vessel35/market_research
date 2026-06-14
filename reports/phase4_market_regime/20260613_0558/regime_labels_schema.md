@@ -22,12 +22,12 @@ document is the authoritative schema + value-rule contract; Phase 3 reads the CS
 | 11 | `volatility_score` | float [0,100] | trailing ATR14 percentile rank at t |
 | 12 | `momentum_score` | float/null | null — not used by this framework |
 | 13 | `mean_reversion_score` | float/null | null — not used by this framework |
-| 14 | `volume_score` | float/null | null this run (no volume data); reserved for a future confidence layer |
-| 15 | `data_quality_score` | float/null | null this run (data-quality checks not run; no data) |
+| 14 | `volume_score` | float/null | null — not used by this classifier_version (volume IS present in input, but is not a classifier feature) |
+| 15 | `data_quality_score` | float/null | null — per-bar QC scoring not part of this classifier_version; overall data-quality check PASSED (`data_quality_report.md`) |
 | 16 | `feature_snapshot_ref` | string/null | pointer to `feature_snapshot.parquet` row; null this run |
 | 17 | `classifier_version` | string | `phase4_specA_v1` |
-| 18 | `source_data_path` | string | OHLCV path (this run: trading-system/backtestdata/ETHUSDT_futures_5min.csv) |
-| 19 | `git_commit` | string | `n/a (not a git repo)` this run |
+| 18 | `source_data_path` | string | machine-independent label of the OHLCV file (this run: `ETHUSDT_futures_5min.csv`); real absolute path + sha256 in `provenance.json` |
+| 19 | `git_commit` | string | repo commit the labels were generated against (this run: `6a721f5`) |
 | 20 | `llm_discretion_used` | bool | always `false`; a `true` value invalidates the row |
 
 ## Value rules
@@ -74,7 +74,7 @@ BEGIN_JSON
   "data_quality_score": null,
   "feature_snapshot_ref": null,
   "classifier_version": "phase4_specA_v1",
-  "source_data_path": "/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv",
+  "source_data_path": "ETHUSDT_futures_5min.csv",
   "git_commit": "6a721f5",
   "llm_discretion_used": false
 }

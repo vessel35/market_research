@@ -407,14 +407,17 @@ confirmed; indicators bars ≤ t only; isolation held).
 
 **Convention note:** the implemented ATR percentile uses pandas
 `rolling(2016,min_periods=288).rank(pct=True)` (count/len) — declared the canonical convention for
-`phase4_specA_v1` (a <0.04% difference from the illustrative `(count−1)/(len−1)`; both strictly
+`phase4_specA_v1` (the illustrative `(count−1)/(len−1)` form differs only in tie-handling and a ±1
+edge term; both strictly
 trailing and causal — classifier spec §8). Effective warmup is 301 bars (vol_score needs 288 ATR
 values).
 
 **Reproducibility & provenance:** `build_regime_labels.py` is CLI-parameterized
-(`--input/--outdir/--git-commit`) and runs from any clone. Regenerating to a temp dir reproduces
-`regime_labels.csv` **byte-identically** (sha256 `0a10b357…`) — determinism + refactor-safety
-proven. Extended tests (`validation_results.md` "Extended tests"): EMA vs pandas `ewm` (~0 diff),
-hand-verified Wilder ATR/+DI/−DI/DX, effective-warmup-301 direct assert, and boundary-stratified
-slice-invariance (ADX∈[24,26], vol∈[68,72]; 0 failures) — all PASS. Provenance (input/output
-sha256, commit lineage 6a721f5→67dc40e→d93b850, lib versions) in `provenance.json`.
+(`--input/--outdir/--git-commit/--source-data-path-label`) and runs from any clone; it auto-writes
+`provenance.json`. The `source_data_path` column stores a machine-independent label
+(`ETHUSDT_futures_5min.csv`), so regeneration is **byte-identical across machines** (sha256
+`1b6e128c…`). `validate_regime_labels.py` re-runs the full suite into `validation_results.md`
+(17 tests, all PASS): EMA vs pandas `ewm` (~0 diff), hand-verified Wilder ATR/+DI/−DI/DX,
+effective-warmup-301 assert, and slice-invariance (40 random + boundary-stratified ADX∈[24,26],
+vol∈[68,72]; 0 failures). `provenance.json` records input/output sha256, rows, git_commit
+(generated against `6a721f5`) and lib versions; git history records the generator/labels commits.

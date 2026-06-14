@@ -20,8 +20,8 @@ trend-following technique; the 9/21/55 periods are repository/SPEC-defined); Man
 ## 3. Input data
 
 ETH/USDT 5m OHLCV: `timestamp`, `open`, `high`, `low`, `close`, `volume`. Timestamps strictly
-ascending, UTC, 5-minute spacing, no duplicates, valid OHLC. (No data loaded this run; this is the
-required input contract for a future data-present run.) No optional data required.
+ascending, UTC, 5-minute spacing, no duplicates, valid OHLC. (Loaded this run from
+`source_data_path`; data-quality verified — see `data_quality_report.md`.) No optional data required.
 
 ## 4. Feature calculation order (per bar t, bars ≤ t only)
 
@@ -93,8 +93,9 @@ train-only fit and not tuned to performance.
 **Implementation note (data-present run, 2026-06-14):** the percentile is computed with pandas
 `rolling(2016, min_periods=288).rank(pct=True)` (= count(window ≤ x)/len, average ties). **For
 classifier_version `phase4_specA_v1` this pandas convention is the canonical/authoritative
-definition**; the `(count−1)/(len−1)` line above is an equivalent illustration (they differ by
-<0.04% at W=2016). Both are strictly trailing (bars ≤ t) and causal. Effective warmup is **301 bars** (ATR(14) first valid ~bar 14, and
+definition**; the `(count−1)/(len−1)` line above is an equivalent illustration (the two forms
+differ only in rank tie-handling and a single ±1 edge term — immaterial at W=2016). Both are
+strictly trailing (bars ≤ t) and causal. Effective warmup is **301 bars** (ATR(14) first valid ~bar 14, and
 `volatility_score` then needs `min_periods=288` further ATR values), slightly beyond the nominal
 `warmup_end=288`; the NaN-gate in §9 handles this correctly (those rows → `unknown_or_warmup`).
 

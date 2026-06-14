@@ -15,6 +15,10 @@ Usage
   python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv \\
       --outdir /path/to/run_dir --git-commit 6a721f5
 
+  # Portable label — write basename as source_data_path column:
+  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv \\
+      --source-data-path-label ETHUSDT_futures_5min.csv
+
 Environment variable shorthand:
   PHASE4_OHLCV=/path/to/ETHUSDT_futures_5min.csv python build_regime_labels.py
 
@@ -22,9 +26,13 @@ Defaults:
   --outdir   : directory containing this script (Path(__file__).resolve().parent)
   --git-commit : auto-detected via `git -C <outdir> rev-parse --short HEAD`,
                  fallback "unknown"
+  --source-data-path-label : basename of --input (e.g. ETHUSDT_futures_5min.csv)
+  --generated-at : today's date (YYYY-MM-DD)
 """
 
 import argparse
+import hashlib
+import json
 import os
 import sys
 import subprocess
@@ -56,7 +64,8 @@ def parse_args():
             "  python build_regime_labels.py \\\n"
             "      --input /data/ETHUSDT_futures_5min.csv \\\n"
             "      --outdir /results/20260613_0558 \\\n"
-            "      --git-commit 6a721f5\n\n"
+            "      --git-commit 6a721f5 \\\n"
+            "      --source-data-path-label ETHUSDT_futures_5min.csv\n\n"
             "Environment variable PHASE4_OHLCV is used as --input default if set."
         ),
         formatter_class=argparse.RawDescriptionHelpFormatter,
@@ -90,6 +99,28 @@ def parse_args():
             "falling back to 'unknown'."
         ),
     )
+    parser.add_argument(
+        "--source-data-path-label",
+        default=None,
+        dest="source_data_path_label",
+        metavar="LABEL",
+        help=(
+            "Label written into the source_data_path column of regime_labels.csv. "
+            "Use this to make the CSV machine-independent (e.g. just the basename). "
+            "The real absolute input path is still recorded in provenance.json. "
+            "Defaults to the basename of --input."
+        ),
+    )
+    parser.add_argument(
+        "--generated-at",
+        default=None,
+        dest="generated_at",
+        metavar="YYYY-MM-DD",
+        help=(
+            "Date string written into provenance.json as generated_at. "
+            "Defaults to today's date (system date at runtime)."
+        ),
+    )
     args = parser.parse_args()
 
     if args.input is None:
@@ -101,7 +132,7 @@ def parse_args():
 
 
 def resolve_paths(args):
-    """Resolve OHLCV_PATH, RUN_DIR, and GIT_COMMIT from parsed args."""
+    """Resolve OHLCV_PATH, RUN_DIR, GIT_COMMIT, SOURCE_DATA_LABEL, GENERATED_AT from parsed args."""
     ohlcv_path = str(args.input)
 
     if args.outdir is not None:
@@ -120,7 +151,75 @@ def resolve_paths(args):
         except Exception:
             git_commit = "unknown"
 
-    return ohlcv_path, run_dir, git_commit
+    # source_data_path_label: default = basename of input path
+    if args.source_data_path_label is not None:
+        source_data_path_label = args.source_data_path_label
+    else:
+        source_data_path_label = Path(ohlcv_path).name
+
+    # generated_at: default = system date
+    if args.generated_at is not None:
+        generated_at = args.generated_at
+    else:
+        from datetime import date
+        generated_at = date.today().isoformat()
+
+    return ohlcv_path, run_dir, git_commit, source_data_path_label, generated_at
+
+
+def sha256_of_file(path: str) -> str:
+    """Compute SHA-256 hex digest of a file."""
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for chunk in iter(lambda: f.read(1 << 20), b""):
+            h.update(chunk)
+    return h.hexdigest()
+
+
+def write_provenance(
+    run_dir: Path,
+    ohlcv_path: str,
+    source_data_path_label: str,
+    labels_path: Path,
+    git_commit: str,
+    generated_at: str,
+    rows: int,
+):
+    """
+    Auto-write provenance.json with reproducibility metadata.
+    Fields are JSON-stable (sorted keys).
+    """
+    import importlib
+    try:
+        numpy_ver = np.__version__
+    except Exception:
+        numpy_ver = "unknown"
+    try:
+        pandas_ver = pd.__version__
+    except Exception:
+        pandas_ver = "unknown"
+    python_ver = f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+
+    prov = {
+        "generated_at": generated_at,
+        "generator_script": "build_regime_labels.py",
+        "git_commit": git_commit,
+        "input_data_path": ohlcv_path,
+        "input_data_sha256": sha256_of_file(ohlcv_path),
+        "numpy": numpy_ver,
+        "pandas": pandas_ver,
+        "python": python_ver,
+        "regime_labels_sha256": sha256_of_file(str(labels_path)),
+        "rows": rows,
+        "source_data_path_label": source_data_path_label,
+    }
+
+    prov_path = run_dir / "provenance.json"
+    prov_path.write_text(
+        json.dumps(prov, indent=2, sort_keys=True) + "\n",
+        encoding="utf-8",
+    )
+    return prov_path
 
 
 # ═════════════════════════════════════════════════════════════════════════════
@@ -440,11 +539,12 @@ def compute_volatility_score(atr14: np.ndarray, vol_window: int, min_periods: in
     within atr14[max(0, t-W+1) .. t]. Window is strictly past + current bar.
     Ties handled by 'average' method (pandas default).
 
-    Note: pandas rolling rank gives rank/(n) by default (pct=True), equivalent
-    to count(window <= x) / len(window). The spec formula uses (len-1) in the
-    denominator (rank in range 0..1 inclusive at both ends). The difference is
-    a single-bar edge effect; for W=2016 min_periods=288 this is negligible (<0.04%).
-    We use pandas rolling rank for efficiency and document it here.
+    Note on percentile forms: the two forms (pandas rolling rank vs the spec's
+    count/(len-1) formula) differ only in rank tie-handling and a single +/-1
+    edge term in the denominator. For phase4_specA_v1, the pandas
+    rolling(...).rank(pct=True) convention is canonical; the (count-1)/(len-1)
+    form is illustrative. At W=2016 min_periods=288 the difference between the
+    two forms is at most 1/(len-1) per bar, which is negligible in practice.
     """
     s = pd.Series(atr14)
     vol_score = s.rolling(window=vol_window, min_periods=min_periods).rank(pct=True) * 100
@@ -511,9 +611,11 @@ def compute_confidence(regime, adx, ema9, ema21, ema55, vol_score, atr14):
 # SECTION 4 — Build regime_labels.csv
 # ═════════════════════════════════════════════════════════════════════════════
 
-def build_labels(df: pd.DataFrame, ohlcv_path: str, git_commit: str) -> pd.DataFrame:
+def build_labels(df: pd.DataFrame, source_data_path_label: str, git_commit: str) -> pd.DataFrame:
     """
     Build the causal regime labels for all bars.
+    source_data_path_label is written to the source_data_path column (not the
+    absolute input path, for machine-independent CSVs).
     """
     close = df["close"].to_numpy(dtype=float)
     n = len(df)
@@ -568,7 +670,7 @@ def build_labels(df: pd.DataFrame, ohlcv_path: str, git_commit: str) -> pd.DataF
                 "data_quality_score":         None,
                 "feature_snapshot_ref":       None,
                 "classifier_version":         CLASSIFIER_VERSION,
-                "source_data_path":           ohlcv_path,
+                "source_data_path":           source_data_path_label,
                 "git_commit":                 git_commit,
                 "llm_discretion_used":        False,
             })
@@ -597,7 +699,7 @@ def build_labels(df: pd.DataFrame, ohlcv_path: str, git_commit: str) -> pd.DataF
                 "data_quality_score":         None,
                 "feature_snapshot_ref":       None,
                 "classifier_version":         CLASSIFIER_VERSION,
-                "source_data_path":           ohlcv_path,
+                "source_data_path":           source_data_path_label,
                 "git_commit":                 git_commit,
                 "llm_discretion_used":        False,
             })
@@ -994,14 +1096,16 @@ def build_validation_report(
 
 def main():
     args = parse_args()
-    ohlcv_path, run_dir, git_commit = resolve_paths(args)
+    ohlcv_path, run_dir, git_commit, source_data_path_label, generated_at = resolve_paths(args)
 
     run_dir.mkdir(parents=True, exist_ok=True)
 
     print("Phase 4 Stage A — data-present acceptance run")
-    print(f"OHLCV input:  {ohlcv_path}")
-    print(f"Output dir:   {run_dir}")
-    print(f"Git commit:   {git_commit}")
+    print(f"OHLCV input:            {ohlcv_path}")
+    print(f"Output dir:             {run_dir}")
+    print(f"Git commit:             {git_commit}")
+    print(f"source_data_path_label: {source_data_path_label}")
+    print(f"generated_at:           {generated_at}")
     print("")
 
     # ── Load raw data ─────────────────────────────────────────────────────────
@@ -1023,14 +1127,27 @@ def main():
 
     # ── Step 2: Build labels ──────────────────────────────────────────────────
     print("Building regime labels...")
-    labels_df = build_labels(df, ohlcv_path, git_commit)
+    labels_df = build_labels(df, source_data_path_label, git_commit)
     print(f"  Done. Total rows: {len(labels_df):,}")
 
     labels_path = run_dir / "regime_labels.csv"
     labels_df.to_csv(labels_path, index=False)
     print(f"  Written: {labels_path}")
 
-    # ── Step 3: Profile ───────────────────────────────────────────────────────
+    # ── Step 3: Auto-write provenance.json ───────────────────────────────────
+    print("Writing provenance.json...")
+    prov_path = write_provenance(
+        run_dir=run_dir,
+        ohlcv_path=ohlcv_path,
+        source_data_path_label=source_data_path_label,
+        labels_path=labels_path,
+        git_commit=git_commit,
+        generated_at=generated_at,
+        rows=len(labels_df),
+    )
+    print(f"  Written: {prov_path}")
+
+    # ── Step 4: Profile ───────────────────────────────────────────────────────
     print("Building profile...")
     profile_text, transition_df, duration_df = build_profile(labels_df)
 
@@ -1046,7 +1163,7 @@ def main():
     duration_df.to_csv(dd_path, index=False)
     print(f"  Written: {dd_path}")
 
-    # ── Step 4: Acceptance tests ──────────────────────────────────────────────
+    # ── Step 5: Acceptance tests ──────────────────────────────────────────────
     print("Running unit tests...")
     unit_results = run_unit_tests()
 

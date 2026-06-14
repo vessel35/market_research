@@ -15,7 +15,7 @@ labels); judging whether the thresholds are appropriate *for trading* is also Ph
 From `reports/phase4_market_regime/20260613_0558/`:
 - `regime_labels.csv` — the causal per-bar labels (the join source). **Generated** (210,528 rows);
   follows `regime_labels_schema.md` exactly.
-- `regime_labels_schema.md` — column + value contract (use until the CSV exists).
+- `regime_labels_schema.md` — column + value contract for the existing `regime_labels.csv`.
 - `market_regime_definition.md` — canonical regime meanings + the value to use for
   `edge_fragment.regime`.
 - `causal_regime_classifier_spec.md`, `regime_labeling_pipeline_spec.md` — join algorithms and

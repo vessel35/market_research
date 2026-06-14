@@ -1,14 +1,13 @@
 {
+  "generated_at": "2026-06-14",
+  "generator_script": "build_regime_labels.py",
+  "git_commit": "6a721f5",
   "input_data_path": "/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv",
   "input_data_sha256": "0a4edf3197863d38838acbcf5b8b684a77700ffb67221dd9ecdeec000bc4a67a",
-  "regime_labels_sha256": "0a10b357531926c70c66b5e239130ded6576bc523e962b56f3a002ea1081f1d2",
-  "rows": 210528,
-  "generator_script": "build_regime_labels.py",
-  "generated_against_git_commit": "6a721f5",
-  "generator_committed_in": "67dc40e",
-  "labels_committed_in": "d93b850",
-  "python": "3.12.13",
-  "pandas": "2.1.4",
   "numpy": "1.26.3",
-  "generated_at": "2026-06-14"
+  "pandas": "2.1.4",
+  "python": "3.12.13",
+  "regime_labels_sha256": "1b6e128cb1751cdd75cd00fd5cec48fe1f2a61e8f071a433d611648a51a7751d",
+  "rows": 210528,
+  "source_data_path_label": "ETHUSDT_futures_5min.csv"
 }

@@ -10,7 +10,9 @@
 
 ETH/USDT 5m OHLCV (`timestamp, open, high, low, close, volume`), Binance USDT-M perpetual,
 UTC, 5-minute spacing. Optional data (funding/OI/taker) not required and absent this run.
-`source_data_path` recorded in the manifest and label rows (this run: `/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv`).
+`source_data_path` in the label rows stores a machine-independent label (this run:
+`ETHUSDT_futures_5min.csv`); the real absolute input path is recorded in the manifest +
+`provenance.json`.
 
 ## 2. Data-quality validation (skill §8a / prompt §18) — run before any labeling
 
@@ -107,4 +109,4 @@ Deterministic: identical OHLCV input → identical labels (no randomness, no mod
 discretion). Record `classifier_version` (`phase4_specA_v1`), `source_data_path`, `git_commit`,
 the fixed thresholds (ADX 25, P70), and the window parameters (W=2016, min 288, warmup 288) so any
 run is bit-reproducible. Live and backtest use the identical classification function. `git_commit`
-is `n/a (not a git repo)` this run.
+is `6a721f5` this run (the repo commit the labels were generated against).
