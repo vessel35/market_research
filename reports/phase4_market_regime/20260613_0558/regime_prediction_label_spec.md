@@ -132,8 +132,8 @@ profit factor, MDD, or Sharpe. It is an abstain/risk signal, not a performance l
 
 ## 8. Label inventory and target columns
 
-A prediction-LABEL file (research artifact under reports/, produced only when data exists; not
-this run) would carry, per (t, horizon):
+The per-(t, horizon) feature/label matrices (`prediction_matrix_h{h}.csv.gz`, regenerable via
+`build_prediction_labels.py`) carry, per (t, horizon):
 
 | column | type | source rule |
 |---|---|---|

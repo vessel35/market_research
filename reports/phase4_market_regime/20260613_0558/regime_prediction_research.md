@@ -11,6 +11,11 @@
 > (train 2024 / test 2025). Empirical metrics are in `regime_prediction_results.md`. All forecasts
 > are probabilistic and auxiliary — never a Phase 3 current-regime label. No Phase 2/3 result used.
 
+**Executed scope (this run):** only the primary target `label_future_regime` (5-class) was trained
+and evaluated. The other designed targets below — `future_trend_regime`, `future_volatility_regime`,
+`future_breakout`, `future_range/transition/no_trade_probability` — remain **designed-but-not-executed**
+(future work). They are kept in this document as the design, not as executed results.
+
 ## 1. What Stage B is (and is not)
 
 Stage A answers "what regime is it NOW?" using only bars ≤ t (causal). Stage B is a separate,
@@ -181,9 +186,10 @@ clear the rule baseline before it is taken seriously.
 
 ## 8. Outputs and Phase 3 usage scope
 
-- Stage B outputs (if ever produced from data) are research artifacts under reports/ only:
-  optional `regime_transition_matrix.csv` (per horizon), a prediction-record file with calibrated
-  probabilities, plus this trio of design docs. They are clearly marked as forecasts.
+- Stage B outputs are research artifacts under reports/ only: `regime_prediction_results.md` +
+  `prediction_metrics.json` (executed metrics), the per-(t,horizon) feature/label matrices
+  (`prediction_matrix_h{h}.csv.gz`, regenerable/gitignored), the per-row calibrated forecast
+  artifact (2025 OOS), and this trio of design docs. All clearly marked as forecasts.
 - Phase 3 MUST NOT use a Stage B prediction as a current-regime label, nor as a
   hybrid-eligibility basis. The causal Stage A label is the only such basis.
 - Predictions are PROBABILISTIC and must be reported with calibration; they are never presented

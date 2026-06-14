@@ -69,7 +69,7 @@
         "volatile": 24866,
         "transition": 9530
       },
-      "sha256": "079152aed18abcca11453acb84799b6798be404a1b4de54d5963eff1a90f83ec"
+      "sha256": "362e6ccc058a305b75abdc6606404104036fc88d0dae6a67da45e417272ab50d"
     },
     "6": {
       "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h6.csv.gz",
@@ -82,7 +82,7 @@
         "volatile": 24866,
         "transition": 9530
       },
-      "sha256": "29240bd902110ac8a04cab14e03ec261257828bd83ba152c134647e3ab2a6641"
+      "sha256": "41c589e72ad14c43475694fc15bf6ae46ea652c3983808d1facd2cac34374ec6"
     },
     "12": {
       "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h12.csv.gz",
@@ -95,7 +95,7 @@
         "volatile": 24863,
         "transition": 9530
       },
-      "sha256": "29c44775fbff41fb5f124198d7dd4556acf0b0d977444e96bf754ca7fed9a69a"
+      "sha256": "5e79be2fc67ec64fdbbf77f0360de16cef4481d0b6b4b5079cc3a503a0e21d2b"
     },
     "24": {
       "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h24.csv.gz",
@@ -108,7 +108,7 @@
         "volatile": 24851,
         "transition": 9530
       },
-      "sha256": "cef80f88a86f350c0d364978c30180051e03471ec5843d69cf7f19fc39616298"
+      "sha256": "90e464cbbe96cfe6c885f6c772fff6e5c031a2fb2235c19c830c908c73eb08e4"
     },
     "48": {
       "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h48.csv.gz",
@@ -121,7 +121,7 @@
         "volatile": 24843,
         "transition": 9530
       },
-      "sha256": "0913f37c302c93846d2a6e12fd65c0dd61d5140c1615b45ffeba5397192566ce"
+      "sha256": "e583544e4686fb60c0f06e913dee805df980c57a0e67c8474ae75f115db3a067"
     }
   }
 }

@@ -27,17 +27,118 @@
     "48": 105048
   },
   "outputs_sha256": {
-    "build_prediction_labels.py": "b0a76e9b1cb5c98f7565a92963ac4ba71c3c9b06ba919a11e7f62a28e2eb69cd",
-    "train_predict_regime.py": "388e997c5bab00641eede9af558a22a654ed2320e97e01d9b5167be0ec4468bc",
-    "prediction_metrics.json": "80612331cefe92770e0c64275c61b3e2b1eb731884564769b27c81e013318768",
-    "prediction_matrix_manifest.json": "c3df95cc9f96f52da763fdf901a07aaa9e112ed75d5bd4b1f31ae98a44a30639",
-    "regime_prediction_results.md": "4c70d93fc8c006de9b3cd5eb85b31229087d687f7cf28e77d7c74750c68c3bd2",
-    "prediction_matrix_h3.csv.gz": "079152aed18abcca11453acb84799b6798be404a1b4de54d5963eff1a90f83ec",
-    "prediction_matrix_h6.csv.gz": "29240bd902110ac8a04cab14e03ec261257828bd83ba152c134647e3ab2a6641",
-    "prediction_matrix_h12.csv.gz": "29c44775fbff41fb5f124198d7dd4556acf0b0d977444e96bf754ca7fed9a69a",
-    "prediction_matrix_h24.csv.gz": "cef80f88a86f350c0d364978c30180051e03471ec5843d69cf7f19fc39616298",
-    "prediction_matrix_h48.csv.gz": "0913f37c302c93846d2a6e12fd65c0dd61d5140c1615b45ffeba5397192566ce",
+    "build_prediction_labels.py": "9bb0f7652b209207da6dd4c812a4938ab1f3284a1804c21ab65ecb25367bad97",
+    "train_predict_regime.py": "f81d2f8387fae701222e27dbeb17fee5ebd68a77cc838634f4125fa931a6c433",
+    "prediction_metrics.json": "697afa707049fd8a112dc61c3d432a99f8fde76720e1920f0d7d7115460e762c",
+    "prediction_matrix_manifest.json": "a0ab816c8233e575dbf268a60d6eabd37909ed2c5cd16637c3d1616827a0d79a",
+    "regime_prediction_results.md": "8e637f931675c66335abfc59e2f6cb3b1d89b068e107841033e5f4955f4c6c71",
     "prediction_provenance.json": null
+  },
+  "reproducible_prediction_matrices": {
+    "note": "Byte-reproducible gzip (mtime=0, empty FNAME header) via write_reproducible_gzip(). Two full regenerations produce byte-identical files (verified). These are derived ONLY from regime_labels.csv.",
+    "committed": false,
+    "regenerable": true,
+    "gzip_method": "gzip.GzipFile(filename='', mtime=0)",
+    "regenerate_cmd": "python build_prediction_labels.py --labels regime_labels.csv --outdir . --horizons 3,6,12,24,48",
+    "files": {
+      "prediction_matrix_h3.csv.gz": {
+        "sha256": "362e6ccc058a305b75abdc6606404104036fc88d0dae6a67da45e417272ab50d",
+        "size_bytes": 14939906,
+        "committed": false,
+        "regenerable": true
+      },
+      "prediction_matrix_h6.csv.gz": {
+        "sha256": "41c589e72ad14c43475694fc15bf6ae46ea652c3983808d1facd2cac34374ec6",
+        "size_bytes": 14940057,
+        "committed": false,
+        "regenerable": true
+      },
+      "prediction_matrix_h12.csv.gz": {
+        "sha256": "5e79be2fc67ec64fdbbf77f0360de16cef4481d0b6b4b5079cc3a503a0e21d2b",
+        "size_bytes": 14944468,
+        "committed": false,
+        "regenerable": true
+      },
+      "prediction_matrix_h24.csv.gz": {
+        "sha256": "90e464cbbe96cfe6c885f6c772fff6e5c031a2fb2235c19c830c908c73eb08e4",
+        "size_bytes": 14943754,
+        "committed": false,
+        "regenerable": true
+      },
+      "prediction_matrix_h48.csv.gz": {
+        "sha256": "e583544e4686fb60c0f06e913dee805df980c57a0e67c8474ae75f115db3a067",
+        "size_bytes": 14942990,
+        "committed": false,
+        "regenerable": true
+      }
+    }
+  },
+  "forecast_artifact": {
+    "note": "Per-row CALIBRATED forecast for 2025 OOS test only, from the 2024-trained calibrated XGBoost (isotonic). AUXILIARY / PROBABILISTIC. NOT a Phase 3 current-regime label. Probabilities are the exact calibrated T3b probabilities used in prediction_metrics.json (consistency verified: forecast argmax accuracy == metrics T3b accuracy per horizon). prediction_usable_from_timestamp = timestamp + 5min (one-bar rule, same as Stage A) and is > timestamp on every row.",
+    "model_version": "phase4_specB_xgb_isotonic_v1",
+    "source_classifier_version": "phase4_specA_v1",
+    "scope": "2025_oos_test_only",
+    "committed": true,
+    "regenerable": true,
+    "gzip_method": "gzip.GzipFile(filename='', mtime=0)",
+    "columns": [
+      "timestamp",
+      "prediction_usable_from_timestamp",
+      "horizon_bars",
+      "target_timestamp",
+      "p_strong_up",
+      "p_strong_down",
+      "p_transition",
+      "p_volatile",
+      "p_range",
+      "predicted_regime",
+      "realized_regime",
+      "model_version",
+      "source_classifier_version"
+    ],
+    "regenerate_cmd": "python train_predict_regime.py --features . --outdir . --seed 42 --horizons 3,6,12,24,48",
+    "files": {
+      "regime_forecast_h3.csv.gz": {
+        "sha256": "5767aa11b4c5050b49ebb226bd593dd1640eda23bb1532e3f499c6e0f754bb3f",
+        "size_bytes": 1958423,
+        "rows": 105117,
+        "horizon_bars": 3,
+        "committed": true,
+        "regenerable": true
+      },
+      "regime_forecast_h6.csv.gz": {
+        "sha256": "97d0a6bf00b14ac58c8dc72ea039e1fa5a8ba4c91bbf449d476e12a70364d97f",
+        "size_bytes": 2510811,
+        "rows": 105114,
+        "horizon_bars": 6,
+        "committed": true,
+        "regenerable": true
+      },
+      "regime_forecast_h12.csv.gz": {
+        "sha256": "06be4470d8b70c91cfca1983efcef1ff44dd14381ddde63c083d0df748de025b",
+        "size_bytes": 2822097,
+        "rows": 105108,
+        "horizon_bars": 12,
+        "committed": true,
+        "regenerable": true
+      },
+      "regime_forecast_h24.csv.gz": {
+        "sha256": "3b1c022677a7c50e8098262ac2020fa10790dfb14260bfaea9079f9ee5c7e5fe",
+        "size_bytes": 2890247,
+        "rows": 105096,
+        "horizon_bars": 24,
+        "committed": true,
+        "regenerable": true
+      },
+      "regime_forecast_h48.csv.gz": {
+        "sha256": "91efc75521336b13ddb7b2ac96a9e213afe2f6957b6709bc84eb1c7bffb29b7a",
+        "size_bytes": 2647505,
+        "rows": 105072,
+        "horizon_bars": 48,
+        "committed": true,
+        "regenerable": true
+      }
+    }
   },
   "versions": {
     "python": "3.12.13",

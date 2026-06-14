@@ -192,11 +192,12 @@ Phase 3 performs the join; Phase 4 only specifies it. Phase 3 writes
 | field | value |
 |---|---|
 | stage_b_status | completed — EXECUTED on real labels (train 2024 / test 2025 + walk-forward) |
-| target | `label_future_regime_h = regime[t+h]`, h ∈ {3,6,12,24,48} bars |
+| target | `label_future_regime_h = regime[t+h]`, h ∈ {3,6,12,24,48} bars (the 5-class target; other designed targets not executed this run) |
 | models | Tier-0 persistence; Tier-1 train-fold transition matrix; Tier-2 multinomial logistic; Tier-3 LightGBM/XGBoost (isotonic-calibrated) |
 | validation | train=2024 / test=2025 holdout + rolling walk-forward in 2024; embargo ≥ h; seed 42; leakage tests T1–T7 PASS; causal-auditor PASS |
 | headline (2025 test, macro-F1) | h=3/6/12: calibrated XGBoost **beats** both persistence and the transition-matrix baseline (e.g. h=3 ≈0.81 vs 0.79). h=24/48: **persistence wins** — learned models collapse to majority `range` (no/negative lift), reported honestly |
-| deliverables | regime_prediction_results.md, prediction_metrics.json, build_prediction_labels.py, train_predict_regime.py, prediction_provenance.json, prediction_matrix_h{3,6,12,24,48}.csv.gz |
+| deliverables (committed) | regime_prediction_results.md, prediction_metrics.json, build_prediction_labels.py, train_predict_regime.py, prediction_provenance.json, prediction_matrix_manifest.json, + per-row 2025 OOS forecast artifact |
+| regenerable (gitignored) | prediction_matrix_h{3,6,12,24,48}.csv.gz (~72MB; reproduce with build_prediction_labels.py) |
 
 Constraints (unchanged): Stage B is **auxiliary/probabilistic** — it does NOT replace the Stage A
 causal classifier, its predictions are NEVER a Phase 3 current-regime label or hybrid-eligibility
@@ -321,7 +322,8 @@ no lifecycle transition.
 | Short-intraday horizon only | EMA9/21/55 ≈ 45/105/275 min (EMA55 ≈ 4.6h); classifier sees only short-intraday regime, not higher-timeframe context | Optional future multi-timeframe extension: anchor 5m labels within causal 1h/4h structure |
 | ATR percentile cold-start (< 288 bars) | First ~288 bars are `unknown_or_warmup`; low-confidence until W_min reached | Expected; warmup rows excluded from Phase 3 hybrid eligibility |
 | Threshold *trading-appropriateness* still open | ADX=25 / P70 are fixed convention/SPEC values; the ETH/USDT 5m distribution is now profiled (§35.14) and the splits are sane, but whether they are optimal *for trading* is a Phase-3 question | Phase 3 evaluates regime-conditional performance; do NOT tune thresholds to performance |
-| Stage B is design-only (no data) | Prediction models not trained/validated (methodology-only) | Execute Stage B (train + walk-forward validate) when OHLCV is present, per regime_prediction_validation_plan.md |
+| (Resolved 2026-06-14) Stage B executed | Future-regime models trained + walk-forward validated on real labels (train 2024 / test 2025); causal-auditor + leakage tests T1–T7 PASS | None — see §35.8 / regime_prediction_results.md. Short-horizon (h=3/6/12) lift over baselines; h≥24 no lift (persistence wins) |
+| Stage B executed scope | Only the primary `label_future_regime` (5-class) was trained/evaluated; the other designed targets (trend/vol/breakout/probabilities) are designed-but-not-executed | Future work: execute the remaining targets; produce full-series walk-forward OOS forecasts if Phase 3 needs 2024 coverage |
 
 ### Next research priorities
 
@@ -332,9 +334,9 @@ no lifecycle transition.
 3. DB schema check: restore research_db connectivity; verify canonical-regime enum mapping.
 4. Hysteresis design: evaluate an ADX hysteresis rule on the train period to reduce 5m label
    flicker; document as a spec amendment.
-5. Stage B execution: the prediction research design is complete (3 files); train and
-   walk-forward-validate the models when OHLCV is present, starting from the rule-based
-   transition-matrix baseline.
+5. (DONE 2026-06-14) Stage B executed (train 2024 / test 2025 + walk-forward) — see §35.8.
+   Follow-up: execute the other designed targets (trend/vol/breakout/probabilities); generate
+   full-series walk-forward OOS forecasts if Phase 3 needs 2024 coverage.
 6. Secondary annotations for Phase 3: session-window and funding-proximity no-trade filters
    (SL_01, SL_02) are ready-to-implement; volume/microstructure confidence layer (F070-F071)
    pending data.

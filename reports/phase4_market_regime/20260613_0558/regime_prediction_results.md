@@ -208,6 +208,40 @@ appear in section 1 and in `prediction_metrics.json`.
 - Stage B is a SUPPLEMENT; Stage A completion is the core Phase 4 result. Stage B does not establish that
   prediction improves strategy performance — that is explicitly post-Phase-3 and out of scope here.
 
+## 9b. Forecast artifact (the Phase-3-consumable per-row output)
+
+The study now emits an actual per-row forecast, not just aggregate metrics. For each horizon
+h in {3, 6, 12, 24, 48} the final **2024-trained, isotonic-calibrated XGBoost** predicts the
+**2025 out-of-sample test set** and writes `regime_forecast_h{h}.csv.gz` (gzip; same byte-
+reproducible writer as the matrices). No in-sample 2024 forecasts are emitted (they would be
+overfit). Scope is 2025 OOS only.
+
+Columns: `timestamp` (bar t), `prediction_usable_from_timestamp`, `horizon_bars`,
+`target_timestamp` (= t + h*5min), the five CALIBRATED class probabilities
+`p_strong_up, p_strong_down, p_transition, p_volatile, p_range` (rounded to 6 dp),
+`predicted_regime` (argmax), `realized_regime` (= regime[t+h] from `regime_labels.csv`, reference
+only — this is historical 2025 data), `model_version` (`phase4_specB_xgb_isotonic_v1`),
+`source_classifier_version` (`phase4_specA_v1`).
+
+**One-bar usability rule.** `prediction_usable_from_timestamp` = `timestamp` + 5min, i.e. the
+forecast for bar t is usable only AFTER bar t closes — the SAME one-bar rule as the Stage A
+causal label. This is enforced in code (assert) and verified: `prediction_usable_from_timestamp`
+is strictly greater than `timestamp` on every row of every horizon. It prevents a one-bar-
+lookahead misread (treating a forecast keyed at bar t as if it were known at or before t).
+
+**Consistency.** The probabilities are EXACTLY the calibrated T3b probabilities used in
+`prediction_metrics.json`; verified by recomputing argmax accuracy from the forecast file and
+matching it bit-for-bit to the metrics `T3b_xgboost.accuracy` at every horizon.
+
+Per-file size and sha256 are recorded in `prediction_provenance.json` under
+`forecast_artifact.files` (committed=false, regenerable=true). These files are gitignored.
+
+**Usage scope (re-emphasized).** This forecast is AUXILIARY and PROBABILISTIC. It is NEVER a
+Phase 3 current-regime label and NEVER a hybrid-eligibility basis; the sole current-regime basis
+remains the causal Stage A `regime`. A forecast may be consumed only as a probabilistic
+risk/abstain signal, with its calibration and baseline comparison (sections 0-3) in view, and at
+long horizons (h>=24) it carries no lift over trivial persistence on macro-F1.
+
 ## 10. Reproduction
 
 BEGIN_JSON
@@ -217,6 +251,12 @@ BEGIN_JSON
   "seed": 42,
   "python": "/home/vessel/workspace/trading-system/.venv/bin/python",
   "metrics_file": "prediction_metrics.json",
-  "provenance_file": "prediction_provenance.json"
+  "provenance_file": "prediction_provenance.json",
+  "forecast_files": "regime_forecast_h{3,6,12,24,48}.csv.gz",
+  "matrices_byte_reproducible": "yes (gzip mtime=0, empty FNAME; two regenerations produce identical sha256)"
 }
 END_JSON
+
+Note: the `prediction_matrix_h*.csv.gz` and `regime_forecast_h*.csv.gz` files are now byte-
+reproducible (gzip written with mtime=0 and an empty filename header), so a second regeneration
+yields the IDENTICAL sha256. They remain gitignored (regenerable; matrices ~72MB total).

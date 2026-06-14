@@ -13,7 +13,9 @@ Usage:
   build_prediction_labels.py --labels regime_labels.csv --outdir . --horizons 3,6,12,24,48
 """
 import argparse
+import gzip
 import hashlib
+import io
 import json
 import os
 import sys
@@ -28,6 +30,22 @@ WARMUP = "unknown_or_warmup"
 REGIME_LAGS = [3, 6]          # one-hot of regime at t-3, t-6
 SCORE_ROLL_WINDOWS = [6, 12]  # trailing means of trend/vol scores (bars <= t)
 SCORE_DELTA_LAGS = [3, 6]     # score[t] - score[t-lag]
+
+
+def write_reproducible_gzip(df, path):
+    """Write df to a byte-reproducible gzip CSV.
+
+    Determinism requires BOTH: mtime=0 (no embedded timestamp) AND an empty FNAME header
+    (pandas/zlib otherwise embeds the output filename, making the gzip path-dependent). With
+    deterministic column order + time-sorted rows, the gzip stream is identical on every
+    regeneration regardless of output path.
+    """
+    csv = df.to_csv(index=False).encode("utf-8")
+    buf = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=buf, mtime=0) as gz:
+        gz.write(csv)
+    with open(path, "wb") as f:
+        f.write(buf.getvalue())
 
 
 def sha256(path):
@@ -154,7 +172,10 @@ def main():
         out["horizon_bars"] = h
 
         out_path = os.path.join(args.outdir, f"prediction_matrix_h{h}.csv.gz")
-        out.to_csv(out_path, index=False, compression="gzip")
+        # Byte-reproducible gzip (mtime=0, empty FNAME). Column order is deterministic
+        # (timestamp,row_index,fixed feature cols,label,horizon) and rows are time-sorted,
+        # so the gzip stream is identical on every regeneration.
+        write_reproducible_gzip(out, out_path)
 
         manifest["per_horizon"][str(h)] = {
             "path": os.path.abspath(out_path),

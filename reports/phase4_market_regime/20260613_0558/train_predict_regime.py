@@ -23,6 +23,8 @@ Usage:
   train_predict_regime.py --features . --outdir . --seed 42 --horizons 3,6,12,24,48
 """
 import argparse
+import gzip
+import io
 import json
 import os
 import sys
@@ -51,10 +53,32 @@ warnings.filterwarnings("ignore")
 CANONICAL = ["strong_up", "strong_down", "transition", "volatile", "range"]
 CLS_IDX = {c: i for i, c in enumerate(CANONICAL)}
 
+# Forecast artifact identity (Tasks 6+7). The forecast is the 2024-trained calibrated XGBoost's
+# 2025 out-of-sample prediction; it is auxiliary/probabilistic and never a Phase 3 current-regime label.
+FORECAST_MODEL_VERSION = "phase4_specB_xgb_isotonic_v1"
+SOURCE_CLASSIFIER_VERSION = "phase4_specA_v1"
+BAR_DELTA = pd.Timedelta(minutes=5)  # 5m bars; usable_from = t + 1 bar (same one-bar rule as Stage A)
+
 # Walk-forward (within-2024) config: expanding folds.
 N_WF_FOLDS = 4
 # Train-internal calibration holdout fraction (chronological tail of train).
 CALIB_FRAC = 0.15
+
+
+def write_reproducible_gzip(df, path):
+    """Write df to a byte-reproducible gzip CSV.
+
+    Determinism requires BOTH: mtime=0 (no embedded timestamp) AND an empty FNAME header
+    (pandas/zlib otherwise embeds the output filename, making the gzip path-dependent). With
+    deterministic column order + time-sorted rows, the gzip stream is identical on every
+    regeneration regardless of output path.
+    """
+    csv = df.to_csv(index=False).encode("utf-8")
+    buf = io.BytesIO()
+    with gzip.GzipFile(filename="", mode="wb", fileobj=buf, mtime=0) as gz:
+        gz.write(csv)
+    with open(path, "wb") as f:
+        f.write(buf.getvalue())
 
 
 def load_matrix(features_dir, h):
@@ -304,6 +328,16 @@ def run_holdout(df, h, seed):
     m3b["brier"] = brier_multiclass(yte_idx, t3b_proba)
     m3b["brier_uncalibrated"] = brier_multiclass(yte_idx, xgbm.predict_proba(Xte))
     results["T3b_xgboost"] = m3b
+
+    # ---- Forecast payload (Tasks 6+7): per-row 2025 OOS forecast from the calibrated XGBoost ----
+    # t3b_proba are EXACTLY the calibrated probabilities used in the T3b metrics above (same array).
+    forecast = {
+        "horizon": h,
+        "timestamp": df["timestamp"].values[test_idx],   # bar t (2025 OOS)
+        "proba": t3b_proba,                               # calibrated class probabilities, order=CANONICAL
+        "realized": yte,                                  # regime[t+h] from the matrix (historical 2025)
+        "calib_class_order": list(cal_xgb.classes_),      # to verify column alignment to CANONICAL idx
+    }
     print(f"      [h] T3b xgb+calib {time.time()-t_x:.1f}s", flush=True)
 
     meta = {
@@ -322,7 +356,7 @@ def run_holdout(df, h, seed):
     wf = walk_forward_2024(Xtr, ytr, ctr, df["timestamp"].values[keep_train], h, seed)
 
     print(f"      [h] walk_forward {time.time()-t_wf:.1f}s", flush=True)
-    return results, meta, wf
+    return results, meta, wf, forecast
 
 
 def leakage_suite(df, h):
@@ -348,6 +382,49 @@ def leakage_suite(df, h):
         si = bool(pd.isna(full) and pd.isna(pref)) or bool(np.isclose(full, pref))
     out["T7_slice_invariance"] = si
     return out
+
+
+def emit_forecast(forecast, outdir):
+    """Write a per-row calibrated forecast (2025 OOS) for one horizon as a reproducible gzip CSV.
+
+    Columns: timestamp (bar t), prediction_usable_from_timestamp (t+5min; one-bar rule, same as
+    Stage A), horizon_bars, target_timestamp (t + h*5min), the 5 calibrated class probabilities,
+    predicted_regime (argmax), realized_regime (regime[t+h], historical 2025, reference only),
+    model_version, source_classifier_version.
+
+    The probabilities are EXACTLY the calibrated T3b probabilities used in the metrics (same array).
+    """
+    h = forecast["horizon"]
+    ts = pd.to_datetime(forecast["timestamp"], utc=True)
+    proba = np.asarray(forecast["proba"], dtype=np.float64)
+
+    # Align proba columns to canonical class index (CalibratedClassifierCV.classes_ are the int codes).
+    class_order = list(forecast["calib_class_order"])
+    assert class_order == list(range(len(CANONICAL))), (
+        f"unexpected calibrated class order {class_order}; cannot align to CANONICAL"
+    )
+
+    out = pd.DataFrame({"timestamp": ts})
+    out["prediction_usable_from_timestamp"] = out["timestamp"] + BAR_DELTA
+    out["horizon_bars"] = int(h)
+    out["target_timestamp"] = out["timestamp"] + (int(h) * BAR_DELTA)
+    for i, c in enumerate(CANONICAL):
+        out[f"p_{c}"] = np.round(proba[:, i], 6)
+    pred_idx = proba.argmax(axis=1)
+    out["predicted_regime"] = [CANONICAL[i] for i in pred_idx]
+    out["realized_regime"] = forecast["realized"]
+    out["model_version"] = FORECAST_MODEL_VERSION
+    out["source_classifier_version"] = SOURCE_CLASSIFIER_VERSION
+
+    # one-bar rule guarantee: usable strictly after the bar closes
+    assert bool((out["prediction_usable_from_timestamp"] > out["timestamp"]).all()), (
+        f"prediction_usable_from_timestamp must be > timestamp for h={h}"
+    )
+
+    path = os.path.join(outdir, f"regime_forecast_h{h}.csv.gz")
+    # Same byte-reproducible gzip as the matrices (mtime=0, empty FNAME); rows time-ordered, cols fixed.
+    write_reproducible_gzip(out, path)
+    return path, len(out)
 
 
 def main():
@@ -382,7 +459,9 @@ def main():
     for h in horizons:
         df, path = load_matrix(features_dir, h)
         leak = leakage_suite(df, h)
-        results, meta, wf = run_holdout(df, h, args.seed)
+        results, meta, wf, forecast = run_holdout(df, h, args.seed)
+        fc_path, fc_rows = emit_forecast(forecast, args.outdir)
+        print(f"[h={h}] forecast -> {fc_path} ({fc_rows} rows)")
         # merge isolation into leakage report
         leak.update(isolation)
         # T3/T5 by design (filtered-only; no HMM smoothing; train-only fits in code)
