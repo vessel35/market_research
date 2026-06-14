@@ -20,8 +20,3 @@ credentials/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
-
-# Large regenerable data artifact (~54MB) — deterministic via build_regime_labels.py.
-# A 2k-row sample (regime_labels_sample.csv) is committed instead; full file regenerable with:
-#   trading-system/.venv/bin/python reports/phase4_market_regime/<run>/build_regime_labels.py
-reports/phase4_market_regime/*/regime_labels.csv
