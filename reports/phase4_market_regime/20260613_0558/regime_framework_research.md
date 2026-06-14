@@ -70,14 +70,16 @@ is therefore **ineligible as primary** this run.
 ### 3.1 Trend-strength (ADX/DMI + moving-average alignment)
 
 - **Theory:** Wilder's ADX/DMI (1978) measures trend *strength* from smoothed directional
-  movement; ADX≥25 = strong trend, ADX<25 = no trend. Direction comes from EMA9/21/55 alignment
-  (Elder triple-screen logic). The ADX+EMA combination is the **repository-defined** framework
+  movement; ADX≥25 = strong trend, ADX<25 = no trend (ADX≥25 is a common TA convention and the
+  repository/SPEC value, not a Wilder-derived constant). Direction comes from EMA9/21/55 alignment
+  — moving-average *alignment* is a standard trend-following technique; the 9/21/55 periods are
+  repository/SPEC-defined. The ADX+EMA combination is the **repository-defined** framework
   (skill §3) — combining strength + direction is sanctioned, not arbitrary mixing.
 - **Features/data:** EMA9/21/55, ADX(14) (needs True Range, +DM, -DM), and a volatility feature
   (ATR(14)) for the volatile/range split. OHLCV only.
 - **Causal feasibility:** Fully causal — all are trailing close-based indicators on bars ≤ t;
   label known at bar-t close, `usable_from_timestamp` = next bar. No model fit. Volatility split
-  uses a causal trailing percentile or theory-fixed cutoff.
+  uses a causal trailing percentile with a fixed convention cutoff (P70).
 - **Look-ahead risks:** Only ADX warmup (~150 bars) instability and the need for a *trailing*
   (never centered/whole-sample) volatility percentile. No future-data reference.
 - **5m fit:** Medium — ADX lag and the 20–25 gray-zone can cause label flicker at 5m (mitigable
@@ -147,7 +149,7 @@ is therefore **ineligible as primary** this run.
 **Selected primary: `TREND_STRENGTH_ADX_EMA_SPEC`** — the repository-defined trend-strength
 framework (ADX(14)≥25 + EMA9/21/55 alignment, with a causal ATR(14)-percentile volatile/range
 split). Weighted score **4.850**, the highest, and it clears every hard gate: strong theory
-(Wilder + Elder), highest `repository_spec_alignment` (it *is* the canonical framework, 1:1
+(Wilder ADX + standard multi-EMA alignment), highest `repository_spec_alignment` (it *is* the canonical framework, 1:1
 mapping), top `causal_safety` (pure trailing formula, no fit), top interpretability, OHLCV-only.
 
 **Next-best:** `PA_MS_001_dow_structure` (4.050) — the strongest theory among directional
@@ -183,7 +185,8 @@ classifier. Specifically:
 
 - Wilder, J.W. (1978) *New Concepts in Technical Trading Systems* — ADX/DMI.
 - StockCharts ChartSchool: ADX, Bollinger BandWidth, TTM Squeeze.
-- Elder, A. (1993) *Trading for a Living* — triple-screen MA alignment.
+- Multiple moving-average *alignment* (MA-ribbon) — standard trend-following TA convention; the
+  EMA9/21/55 periods are repository/SPEC-defined, not from a named author's system.
 - Edwards & Magee (1948) *Technical Analysis of Stock Trends* — Dow theory.
 - Mandelbrot (1963); Engle (1982, ARCH) — volatility clustering.
 - Parkinson (1980); Garman & Klass (1980) — range-based volatility estimators.

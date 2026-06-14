@@ -11,7 +11,8 @@ volatility split. One framework, no mixing.
 
 ## 2. Theoretical basis
 
-Wilder (1978) ADX/DMI for trend strength; Elder triple-EMA alignment for direction; Mandelbrot
+Wilder (1978) ADX/DMI for trend strength; multi-EMA *alignment* for direction (a standard
+trend-following technique; the 9/21/55 periods are repository/SPEC-defined); Mandelbrot
 (1963)/Engle (1982) volatility clustering for the volatile/range split. See
 `regime_framework_research.md` §3.1.
 
@@ -116,9 +117,10 @@ from Phase 3 hybrid eligibility (the Phase 3 join already treats "no usable labe
 
 ## 10. Threshold source
 
-ADX gate `25` = Wilder theory-fixed; volatility-high cutoff `P70` = documented convention applied
+ADX gate `25` = repository/SPEC value and common TA convention (Wilder grounds the ADX concept; 25
+is convention, not a derived constant); volatility-high cutoff `P70` = documented design convention applied
 to a causal trailing ATR percentile. Priority chain (skill §15): SPEC/code (absent) → train-period
-percentile (no data) → walk-forward percentile (no data) → **theory-fixed** (used). Never tuned to
+percentile (no data) → walk-forward percentile (no data) → **fixed convention/SPEC value** (used; to be profiled against the data distribution later). Never tuned to
 Phase 2/3 performance or a test set.
 
 ## 11. usable_from_timestamp rules

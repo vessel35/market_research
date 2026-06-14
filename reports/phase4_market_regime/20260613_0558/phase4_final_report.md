@@ -1,7 +1,10 @@
 # Phase 4 Market Regime — Stage A Final Report
 
 **Run:** 20260613_0558 · **Produced by:** completeness-auditor · **Date:** 2026-06-13
-**Verdict:** Stage A COMPLETE — all six gates passed.
+**Verdict:** Stage A COMPLETE (methodology/deliverable completeness — all six gates passed). This
+is spec/deliverable completeness, **NOT empirical validation**: no `regime_labels.csv`, label
+distribution, regime-duration/transition statistics, or executed unit/slice-invariance tests yet —
+those are data-dependent and pending OHLCV.
 
 ---
 
@@ -45,7 +48,7 @@ with documented reasons.
 | statistical (HMM / regime-switching) | 4 | 2.625 (stat_hmrs_hamilton) | all HARD-GATED (causal_safety + no-data) |
 | session / liquidity | 3 | 3.975 (SL_01_session_window) | all HARD-GATED (cannot map price regime) |
 
-Sources: Wilder (1978), Elder (1993), Dow/Edwards-Magee (1948), Mandelbrot (1963), Engle (1982),
+Sources: Wilder (1978), standard multi-EMA / MA-ribbon alignment (TA convention; 9/21/55 repo/SPEC-defined), Dow/Edwards-Magee (1948), Mandelbrot (1963), Engle (1982),
 Hamilton (1989), Rabiner (1989), Admati-Pfleiderer (1988), Kyle (1985), Amihud (2002), Binance
 funding-rate documentation.
 
@@ -125,7 +128,7 @@ All five canonical regimes, defined by the selected framework's rules:
 `all` is not a per-bar regime — it is the Phase 3 unconditional-aggregation bucket only and
 never appears as a row value in `regime_labels.csv`.
 
-Threshold policy: ADX gate = 25 (Wilder theory-fixed constant); P70 cutoff = fixed convention
+Threshold policy: ADX gate = 25 (repository/SPEC value and common TA convention, not a Wilder-derived constant); P70 cutoff = fixed design convention
 applied to a causal trailing ATR(14) percentile (window W=2016 bars, min 288). Neither threshold
 was tuned to Phase 2/3 performance or a test set.
 
@@ -204,12 +207,12 @@ Evidence per checklist row. Source: `lookahead_bias_prevention_checklist.md`.
 | no future return in a current feature | yes | no future-return term anywhere; causal-auditor check 2 PASS |
 | no future high/low/min/max in a current feature | yes | ATR percentile strictly trailing; no future H/L/min/max; classifier §8; causal-auditor check 2 |
 | label separated from feature | yes | labels in schema, features in catalog; distinct columns |
-| selected framework is theory-grounded | yes | Wilder ADX/DMI + Elder EMA alignment + Mandelbrot/Engle vol clustering; research §3.1 |
+| selected framework is theory-grounded | yes | Wilder ADX/DMI + standard multi-EMA alignment + Mandelbrot/Engle vol clustering; research §3.1 |
 | exactly one primary framework | yes | one `selected_as_primary=true` in matrix (TREND_STRENGTH_ADX_EMA_SPEC) |
 | no arbitrary mixing | yes | only the framework's own ATR-percentile vol split; no other family rule; causal-auditor check 4 PASS |
 | rejected frameworks documented | yes | 16 rejected rows with rejection_reason in matrix; research §3-4 |
 | scaler fit train-only (if used) | n/a | no scaler used; rule-based; no fit performed |
-| threshold fit train-only (if adaptive) | n/a | thresholds theory/convention-fixed (ADX=25, P70); not tuned to performance |
+| threshold fit train-only (if adaptive) | n/a | thresholds fixed convention/SPEC values (ADX=25, P70), not theory-derived; not tuned to performance |
 | clustering fit train-only (if used) | n/a | no clustering in selected framework; statistical candidates rejected |
 | no Phase 2 result used | yes | no Phase 2 artifact read; isolation stated in manifest and research |
 | no Phase 3 result used | yes | no Phase 3 artifact read |
@@ -308,7 +311,7 @@ no lifecycle transition.
 | Not a git repo | `git_commit = n/a`; reproducibility relies solely on the spec file contents | Initialize a git repo or confirm version tracking; record commit hash in future runs |
 | ADX 20-25 gray-zone at 5m | Label flicker at the ADX boundary; labels may oscillate between `transition` and `strong_up`/`strong_down` near the gate | Consider a hysteresis rule (confirmed only after N bars above/below threshold); document as a spec amendment and confirm against train data |
 | ATR percentile cold-start (< 288 bars) | First ~288 bars are `unknown_or_warmup`; low-confidence until W_min reached | Expected; warmup rows excluded from Phase 3 hybrid eligibility |
-| Thresholds unvalidated against train data | ADX=25 and P70 are theory/convention-fixed; not confirmed against ETH/USDT 5m distribution | When data is available, compute train-period ADX and ATR percentile distributions; confirm thresholds are reasonable (but do not tune to performance) |
+| Thresholds unvalidated against data | ADX=25 and P70 are fixed convention/SPEC values (not theory-derived); not confirmed against ETH/USDT 5m distribution | When data is available, compute train-period ADX and ATR percentile distributions; confirm thresholds are reasonable (but do not tune to performance) |
 | Stage B is design-only (no data) | Prediction models not trained/validated (methodology-only) | Execute Stage B (train + walk-forward validate) when OHLCV is present, per regime_prediction_validation_plan.md |
 
 ### Next research priorities

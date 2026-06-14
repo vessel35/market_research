@@ -57,7 +57,7 @@ causal label file or used as a hybrid-eligibility basis.
 
 ## 8. Threshold policy
 
-ADX gate = 25 (Wilder fixed); volatility-high cutoff = P70 of a causal trailing ATR(14)
+ADX gate = 25 (repository/SPEC value and common TA convention, not a Wilder-derived constant); volatility-high cutoff = P70 (design convention) of a causal trailing ATR(14)
 percentile. Fixed convention/theory thresholds — never tuned to Phase 2/3 performance or a test
 set (see `selected_primary_regime_framework.md` §8 and `causal_regime_classifier_spec.md` §10).
 

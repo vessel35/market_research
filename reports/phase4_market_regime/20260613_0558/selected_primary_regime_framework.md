@@ -23,10 +23,13 @@ look-ahead traps). Next-best was Dow swing structure (4.050), kept as future res
 
 - **Trend strength — ADX/DMI (Wilder 1978):** directional movement (+DM, −DM) smoothed against
   True Range yields +DI/−DI; their normalized divergence (DX), Wilder-smoothed over 14, is ADX.
-  ADX rises in any persistent trend and falls in directionless markets; ADX≥25 is Wilder's
-  strong-trend threshold.
-- **Direction — multi-EMA alignment (Elder triple-screen):** EMA9>EMA21>EMA55 = uniformly
-  bullish multi-horizon structure; the reverse = bearish.
+  ADX rises in any persistent trend and falls in directionless markets. The ADX≥25 "strong
+  trend" cutoff is a common TA convention and the repository/SPEC value — Wilder grounds the ADX
+  trend-strength *concept*, but the specific 25 is convention, not a Wilder-derived constant.
+- **Direction — multi-EMA alignment:** EMA9>EMA21>EMA55 = uniformly bullish multi-horizon
+  structure; the reverse = bearish. Moving-average *alignment* is a standard trend-following
+  technique; the specific 9/21/55 periods are repository/SPEC-defined, not from a named author's
+  system.
 - **Volatility split — clustering (Mandelbrot 1963; Engle 1982):** within the no-trend bucket,
   ATR percentile separates a high-volatility (choppy) state from a quiet range.
 
@@ -69,10 +72,13 @@ for the survey but **excluded from the classifier** to honor the no-mixing princ
 ## 8. Threshold policy
 
 Priority per skill §15 / prompt §21.4: SPEC/existing-code → train-period percentile →
-walk-forward rolling percentile → theory-fixed. This is a methodology-only phase (no separate
-SPEC.md/code is required) and no data is loaded, so we fall to **theory-fixed**:
+walk-forward rolling percentile → fixed convention/theory. This is a methodology-only phase (no
+separate SPEC.md/code is required) and no data is loaded, so we fall to **fixed convention/SPEC
+values** (to be profiled against the data distribution later, never tuned to performance):
 
-- **ADX trend gate = 25** — Wilder theory-fixed constant.
+- **ADX trend gate = 25** — repository/SPEC value and a common TA convention for a strong trend
+  (Wilder grounds the ADX trend-strength concept; 25 is convention, not a derived constant). To be
+  profiled against the ETH/USDT 5m ADX distribution when data is present (never tuned to performance).
 - **Volatility-high cutoff = 70th percentile (P70)** — documented convention; applied to a
   **causal trailing percentile** of ATR(14) (a rolling online statistic over bars ≤ t, window
   default W=2016 bars ≈ 7 days; expanding from data start until W is reached).
@@ -102,7 +108,7 @@ ever produced) live in separate files. Independently reviewed by `causal-auditor
 - The volatility split needs a trailing percentile that requires accumulated history to be
   meaningful; cold-start bars are low-confidence/warmup.
 - **Methodology-only phase:** `regime_labels.csv` and data-quality checks are out of scope
-  (data-dependent artifacts), not deficiencies; thresholds are theory/convention-fixed and would
+  (data-dependent artifacts), not deficiencies; thresholds are fixed convention/SPEC values and would
   be confirmed against train data (never tuned to performance) in a later data-present run.
   SPEC.md is not required — the `regime-classification` skill is the canonical source by design;
   the existing-classifier-vs-SPEC discrepancy check is not applicable (no existing classifier).

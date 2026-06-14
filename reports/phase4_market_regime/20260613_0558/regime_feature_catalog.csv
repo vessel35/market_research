@@ -10,7 +10,7 @@ F010,plus_DI14,trend,"100*WilderRMA(+DM,14)/ATR14",14,"high,low,close",,true,nex
 F011,minus_DI14,trend,"100*WilderRMA(-DM,14)/ATR14",14,"high,low,close",,true,next_bar,"direction variant (DMI); not used as classifier input",TREND_STRENGTH_ADX_DMI_DIR,false,true,true,low,spec_only,low
 F012,ema55_slope,trend,"(EMA55[t]-EMA55[t-5])/5 (backward finite diff)",60,close,,true,next_bar,"trend slope for EMA-only variant survey",TREND_STRENGTH_EMA_ONLY_SLOPE,false,true,true,low,spec_only,low
 F013,ema_spread,trend,"(EMA9-EMA55)/ATR14 (normalized separation)",55,"high,low,close",,true,next_bar,"alignment-strength input to regime_confidence",TREND_STRENGTH_ADX_EMA_SPEC,false,true,true,low,spec_only,medium
-F020,atr_pct_of_price,volatility,"ATR14/close",14,"high,low,close",,true,next_bar,"alternative theory-fixed volatility normalization (survey)",vol_01_atr_percentile,false,true,true,low,spec_only,low
+F020,atr_pct_of_price,volatility,"ATR14/close",14,"high,low,close",,true,next_bar,"alternative fixed-threshold volatility normalization (survey)",vol_01_atr_percentile,false,true,true,low,spec_only,low
 F021,bb_width,volatility,"(SMA20+2*STD20 - (SMA20-2*STD20))/SMA20*100",20,close,,true,next_bar,"Bollinger BandWidth volatility (survey)",vol_02_bbw_squeeze,false,true,true,medium,spec_only,low
 F022,realized_vol_parkinson,volatility,"sqrt(1/(4N ln2) * sum(ln(H/L)^2))",20,"high,low",,true,next_bar,"range-based RV estimator (survey; degrades at 5m)",vol_03_realized_vol_percentile,false,true,true,medium,spec_only,low
 F023,ttm_squeeze_on,volatility,"BB(20,2) fully inside Keltner(EMA20,1.5*ATR20)",20,"high,low,close",,true,next_bar,"no-fit compression flag (survey; alt split impl.)",vol_04_ttm_squeeze_composite,false,true,true,low,spec_only,low
