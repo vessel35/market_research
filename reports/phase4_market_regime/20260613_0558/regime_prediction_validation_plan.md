@@ -1,14 +1,15 @@
-# Regime Prediction Validation Plan (Stage B — Design Only)
+# Regime Prediction Validation Plan (Stage B — Executed)
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Stage:** B. **Status:** DESIGN / METHODOLOGY-ONLY (NO OHLCV loaded; nothing trained or scored).
+**Stage:** B. **Status:** EXECUTED (2026-06-14) — train 2024 / test 2025 + walk-forward; results in
+`regime_prediction_results.md`.
 **Skills applied:** `statistical-validation` (time-ordered CV, train-only fit, no shuffle),
 `ml-strategy` (walk-forward, label construction, calibration).
 
-> No metric in this document is an empirical result. This is the validation PROTOCOL to be run
-> when data is present. Any future reporting of these metrics must include class balance, the
-> confusion matrix, calibration, and the per-fold spread — a single headline number is not a
-> valid claim, and a forecast is never presented as a certain future.
+> This validation PROTOCOL was EXECUTED on real labels. Empirical metrics are in
+> `regime_prediction_results.md`, reported with class balance, the confusion matrix, calibration,
+> and the per-fold spread (no single headline number); forecasts are never presented as a certain
+> future. Leakage tests T1–T7 passed.
 
 ## 1. Validation principle (strictly time-ordered)
 

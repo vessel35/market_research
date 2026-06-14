@@ -1,13 +1,15 @@
-# Regime Prediction Research (Stage B — Design Only)
+# Regime Prediction Research (Stage B — Executed)
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Stage:** B (optional future-regime prediction). **Status:** DESIGN / METHODOLOGY-ONLY.
+**Stage:** B (optional future-regime prediction). **Status:** EXECUTED on real ETH/USDT 5m labels
+(2026-06-14) — empirical results in `regime_prediction_results.md`.
 **Built on top of:** Stage A current-regime classifier `TREND_STRENGTH_ADX_EMA_SPEC`
 (classifier version `phase4_specA_v1`), which is COMPLETE and is NOT modified by this stage.
 
-> NO OHLCV DATA IS LOADED IN THIS RUN. Nothing here is trained, fitted, or measured on real
-> data. No accuracy/metric below is an empirical result; all numeric examples are explicitly
-> labeled ILLUSTRATIVE and are not derived from data, Phase 2 results, or Phase 3 results.
+> EXECUTED on real data: future-regime labels were built from the Stage A `regime_labels.csv`
+> (210,227 labeled bars, 2024–2025) and models were trained + walk-forward validated
+> (train 2024 / test 2025). Empirical metrics are in `regime_prediction_results.md`. All forecasts
+> are probabilistic and auxiliary — never a Phase 3 current-regime label. No Phase 2/3 result used.
 
 ## 1. What Stage B is (and is not)
 
@@ -107,28 +109,15 @@ Each rule emits a probability, not a hard class. Rules are combined by a fixed, 
 (e.g. transition matrix as the prior, the three structural rules as bounded adjustments), never
 by a weight tuned to Phase 2/3 outcomes.
 
-#### Illustrative transition matrix (NOT derived from data)
+#### Transition-matrix baseline (real, train-fold estimated)
 
-The following is a hand-written EXAMPLE to show the artifact's shape, intended for
-`regime_transition_matrix.csv` when data is present. Values are invented placeholders, not
-estimates. Rows = current regime, columns = regime at t+h, rows sum to 1.0.
-
-BEGIN_JSON
-{
-  "_warning": "ILLUSTRATIVE ONLY — not derived from any data; placeholders to show shape",
-  "horizon": "next_6",
-  "rows_current_regime_cols_future_regime": {
-    "strong_up":   {"strong_up": 0.62, "strong_down": 0.02, "transition": 0.18, "volatile": 0.08, "range": 0.10},
-    "strong_down": {"strong_up": 0.02, "strong_down": 0.60, "transition": 0.19, "volatile": 0.09, "range": 0.10},
-    "transition":  {"strong_up": 0.18, "strong_down": 0.17, "transition": 0.30, "volatile": 0.18, "range": 0.17},
-    "volatile":    {"strong_up": 0.10, "strong_down": 0.10, "transition": 0.20, "volatile": 0.35, "range": 0.25},
-    "range":       {"strong_up": 0.08, "strong_down": 0.08, "transition": 0.14, "volatile": 0.20, "range": 0.50}
-  }
-}
-END_JSON
-
-When data exists, this matrix is estimated on the TRAIN window only (per fold), never on the test
-window, and never on the whole sample.
+The Tier-1 baseline is the empirical transition matrix P(regime[t+h] | regime[t]). For
+VALIDATION it is estimated on the TRAIN window only (per fold), never on the test window or the
+whole sample. The Stage A whole-data descriptive matrix is `regime_transition_matrix.csv`
+(empirical persistence ≈ 0.95 on the diagonal for trend/range regimes, ≈ 0.80 for `transition`);
+that file is descriptive only and is NOT used as the validated baseline (using it would leak the
+2025 test year). Executed results vs this baseline (and vs Tier-0 persistence) are in
+`regime_prediction_results.md`.
 
 ### 5.2 Tier 2 — Classical statistical models
 

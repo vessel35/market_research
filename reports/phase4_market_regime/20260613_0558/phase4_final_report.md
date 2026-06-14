@@ -21,7 +21,7 @@ profiles the distribution, never tuning to performance.)
 | run_mode | data-present acceptance run (methodology spec executed on real OHLCV, 2026-06-14) |
 | data_period | 2024-01-01 00:00:00 → 2025-12-31 23:55:00 (210,528 bars; UTC) |
 | stage_a_status | completed |
-| stage_b_status | completed (research design; methodology-only) |
+| stage_b_status | completed — executed on real labels (2025 out-of-sample test) |
 | selected_primary_framework | TREND_STRENGTH_ADX_EMA_SPEC |
 | primary_labeling_method | causal |
 | phase2_results_used | false |
@@ -187,21 +187,21 @@ Phase 3 performs the join; Phase 4 only specifies it. Phase 3 writes
 
 ---
 
-## §35.8 Prediction Research Summary (Stage B)
+## §35.8 Prediction Research Summary (Stage B — EXECUTED 2026-06-14)
 
 | field | value |
 |---|---|
-| stage_b_status | completed (research design; methodology-only) |
-| scope | Stage B initiated after Stage A COMPLETE (user request). Design-only — no data, so no model is trained/validated; auxiliary to Stage A and not a core Phase 4 completion requirement. |
-| stage_b_started_after_stage_a | true |
-| regime_prediction_research.md | produced — horizons (3/6/12/24/48 bars), 7 targets, model tiers (rule-based transition baseline → logistic/Markov/HMM → RF/GBM/XGBoost) |
-| regime_prediction_label_spec.md | produced — future labels as supervised targets only; strict feature(≤t)/label(>t) separation + embargo gap |
-| regime_prediction_validation_plan.md | produced — walk-forward/expanding/rolling time split; forbidden-split list; metrics; leakage test suite |
+| stage_b_status | completed — EXECUTED on real labels (train 2024 / test 2025 + walk-forward) |
+| target | `label_future_regime_h = regime[t+h]`, h ∈ {3,6,12,24,48} bars |
+| models | Tier-0 persistence; Tier-1 train-fold transition matrix; Tier-2 multinomial logistic; Tier-3 LightGBM/XGBoost (isotonic-calibrated) |
+| validation | train=2024 / test=2025 holdout + rolling walk-forward in 2024; embargo ≥ h; seed 42; leakage tests T1–T7 PASS; causal-auditor PASS |
+| headline (2025 test, macro-F1) | h=3/6/12: calibrated XGBoost **beats** both persistence and the transition-matrix baseline (e.g. h=3 ≈0.81 vs 0.79). h=24/48: **persistence wins** — learned models collapse to majority `range` (no/negative lift), reported honestly |
+| deliverables | regime_prediction_results.md, prediction_metrics.json, build_prediction_labels.py, train_predict_regime.py, prediction_provenance.json, prediction_matrix_h{3,6,12,24,48}.csv.gz |
 
-Stage B has been designed (the three files above). When executed on data it must: (a) keep the
-current causal classifier unchanged, (b) never feed a future label as a current-regime feature,
-(c) use walk-forward validation with train-only model fit, and (d) be treated as
-auxiliary/probabilistic — never a current-regime label for Phase 3.
+Constraints (unchanged): Stage B is **auxiliary/probabilistic** — it does NOT replace the Stage A
+causal classifier, its predictions are NEVER a Phase 3 current-regime label or hybrid-eligibility
+basis, and it does NOT establish that prediction improves strategy performance (a post-Phase-3
+question). Short-horizon lift exists; long-horizon (h≥24) prediction is no better than persistence.
 
 ---
 

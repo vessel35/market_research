@@ -1,7 +1,8 @@
-# Regime Prediction Label Spec (Stage B — Design Only)
+# Regime Prediction Label Spec (Stage B — Executed)
 
 **Symbol/market:** ETH/USDT, Binance USDT-M perpetual futures, 5m · **Run:** 20260613_0558
-**Stage:** B. **Status:** DESIGN / METHODOLOGY-ONLY (NO OHLCV loaded; nothing computed).
+**Stage:** B. **Status:** EXECUTED on real labels (2026-06-14); labels built from Stage A
+`regime_labels.csv` by `build_prediction_labels.py`. See `regime_prediction_results.md`.
 **Source of the per-bar regime:** Stage A causal classifier `TREND_STRENGTH_ADX_EMA_SPEC`
 (`phase4_specA_v1`). Stage A is NOT modified.
 
@@ -20,9 +21,10 @@ For a decision bar t and horizon h ∈ {3, 6, 12, 24, 48} bars:
 - **Embargo gap (§5):** ensures the predictor's `usable_from_timestamp` never crosses into the
   label region.
 
-A training row exists only if BOTH the feature region is past warmup (Stage A
-`warmup_end = 288`) AND the full label region `(t, t+h]` exists in-sample for that fold. Rows
-without a complete future window are dropped, never back-filled or padded.
+A training row exists only if BOTH the feature region is past warmup (Stage A **effective warmup =
+301 bars**; first labeled bar idx 301 = 2024-01-02 01:05:00 — the nominal `warmup_end=288` plus the
+volatility_score's 288-bar min window) AND the full label region `(t, t+h]` exists in-sample for
+that fold. Rows without a complete future window are dropped, never back-filled or padded.
 
 ## 2. Primary label — `label_future_regime_h`
 

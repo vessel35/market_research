@@ -20,3 +20,7 @@ credentials/
 __pycache__/
 *.pyc
 .ipynb_checkpoints/
+
+# Large regenerable Stage B feature/label intermediates (~72MB) — deterministic via
+# build_prediction_labels.py; full per-class metrics are kept in prediction_metrics.json.
+reports/phase4_market_regime/*/prediction_matrix_*.csv.gz
