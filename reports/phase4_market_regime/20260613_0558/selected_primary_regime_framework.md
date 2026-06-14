@@ -17,7 +17,10 @@ simultaneously (a) directional (can express `strong_up`/`strong_down`, unlike th
 session families), (b) fully causal with no model fit (unlike the statistical family, which is
 also un-trainable in this no-data run), and (c) a 1:1 match to the SPEC canonical vocabulary
 (unlike price-action, which needs an auxiliary volatility feature and carries pivot-lag
-look-ahead traps). Next-best was Dow swing structure (4.050), kept as future research.
+look-ahead traps). Next-best was Dow swing structure (4.050), kept as future research. This is the
+best fit **for the selection rubric and current constraints** (causal, OHLCV-only, interpretable,
+Phase-3-join) — **not a proven statistical optimum**; alternatives (Dow structure, HMM/Markov
+switching, volatility-state models) should be compared empirically once data is available.
 
 ## 3. Theoretical basis
 
@@ -30,8 +33,18 @@ look-ahead traps). Next-best was Dow swing structure (4.050), kept as future res
   structure; the reverse = bearish. Moving-average *alignment* is a standard trend-following
   technique; the specific 9/21/55 periods are repository/SPEC-defined, not from a named author's
   system.
-- **Volatility split — clustering (Mandelbrot 1963; Engle 1982):** within the no-trend bucket,
-  ATR percentile separates a high-volatility (choppy) state from a quiet range.
+- **Volatility split — volatility clustering (Mandelbrot 1963; Engle 1982 ARCH):** within the
+  no-trend bucket, ATR percentile separates a high-volatility (choppy) state from a quiet range.
+  Mandelbrot grounds non-normality/fat-tails (large changes tend to follow large changes); Engle
+  ARCH grounds conditional (past-dependent) volatility. Neither *derives* the P70 cutoff — P70 is
+  a design convention.
+
+**Grounding-strength tiers (be precise):** ADX/DMI trend strength = **strong** (Wilder, an
+established method); multi-EMA *alignment* for direction = **standard practitioner** technique;
+the volatility-split *concept* is theory-grounded, but its **P70 cutoff and the 9/21/55 and
+ADX-25 parameters are repository/SPEC conventions**, not academically-derived optima. The
+selection `theoretical_basis_strength` score reflects the *methods'* grounding; the specific
+parameter values remain conventions to be profiled against data (never tuned to performance).
 
 Combining a strength gate with a direction signal is the **repository-defined** design (skill §3),
 not arbitrary mixing.
@@ -105,6 +118,10 @@ ever produced) live in separate files. Independently reviewed by `causal-auditor
 
 - ADX lag and 20–25 gray-zone can flicker labels at 5m (a documented hysteresis option exists but
   is not in the SPEC; not added to avoid altering the canonical rule).
+- **Short-intraday horizon only:** at 5m, EMA9/21/55 ≈ 45 / 105 / 275 min (EMA55 ≈ 4.6h) and the
+  volatility window W=2016 ≈ 7 days. The classifier captures the short-intraday regime; it does
+  not see higher-timeframe market context (a future multi-timeframe extension could anchor 5m
+  labels within causal 1h/4h structure).
 - The volatility split needs a trailing percentile that requires accumulated history to be
   meaningful; cold-start bars are low-confidence/warmup.
 - **Methodology-only phase:** `regime_labels.csv` and data-quality checks are out of scope

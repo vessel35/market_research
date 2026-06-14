@@ -93,6 +93,13 @@ entry/exit timestamps.
 `range` is the framework's own internal auxiliary (explicitly sanctioned by skill §3/§6), not a
 second co-primary family. No rule from any other family enters the classifier.
 
+**Best-for-rubric, not proven-optimal:** it scored highest (4.850 vs Dow 4.050) under the
+selection rubric and current constraints (causal, OHLCV-only, interpretable, Phase-3-join) — this
+is **not** a claim of statistical optimality. Alternatives (Dow structure, HMM/Markov switching,
+volatility-state models) remain open and should be compared empirically once data is available.
+Grounding is **tiered**: ADX/DMI = strong (Wilder); multi-EMA *alignment* = standard practitioner;
+the 9/21/55, ADX-25, and P70 values are repository/SPEC conventions, not academically-derived optima.
+
 **Rejected alternatives summary:**
 
 | candidate | rejection reason |
@@ -310,6 +317,7 @@ no lifecycle transition.
 | research_db not queried | Schema and canonical-mapping confirmation from the DB is unverified | Restore DB connectivity; run a SELECT-only schema check (read-only role); record any discrepancy |
 | Not a git repo | `git_commit = n/a`; reproducibility relies solely on the spec file contents | Initialize a git repo or confirm version tracking; record commit hash in future runs |
 | ADX 20-25 gray-zone at 5m | Label flicker at the ADX boundary; labels may oscillate between `transition` and `strong_up`/`strong_down` near the gate | Consider a hysteresis rule (confirmed only after N bars above/below threshold); document as a spec amendment and confirm against train data |
+| Short-intraday horizon only | EMA9/21/55 ≈ 45/105/275 min (EMA55 ≈ 4.6h); classifier sees only short-intraday regime, not higher-timeframe context | Optional future multi-timeframe extension: anchor 5m labels within causal 1h/4h structure |
 | ATR percentile cold-start (< 288 bars) | First ~288 bars are `unknown_or_warmup`; low-confidence until W_min reached | Expected; warmup rows excluded from Phase 3 hybrid eligibility |
 | Thresholds unvalidated against data | ADX=25 and P70 are fixed convention/SPEC values (not theory-derived); not confirmed against ETH/USDT 5m distribution | When data is available, compute train-period ADX and ATR percentile distributions; confirm thresholds are reasonable (but do not tune to performance) |
 | Stage B is design-only (no data) | Prediction models not trained/validated (methodology-only) | Execute Stage B (train + walk-forward validate) when OHLCV is present, per regime_prediction_validation_plan.md |
@@ -329,3 +337,30 @@ no lifecycle transition.
 6. Secondary annotations for Phase 3: session-window and funding-proximity no-trade filters
    (SL_01, SL_02) are ready-to-implement; volume/microstructure confidence layer (F070-F071)
    pending data.
+
+---
+
+## §35.13 Usage readiness & acceptance criteria
+
+**Status:** methodology/deliverable complete — usable as a *specification*, not yet empirically
+validated.
+
+**Usable now:**
+- As the causal classifier implementation spec.
+- As the `regime_labels.csv` generation contract (column/value rules).
+- As the Phase 3 trade/period-join contract.
+
+**Not yet (until empirical validation on real OHLCV):**
+- Drawing regime-conditional strategy conclusions.
+- Hybrid / no-trade eligibility decisions.
+- Asserting that ADX=25 / P70 / EMA9-21-55 are appropriate for ETH/USDT 5m.
+
+**Minimum acceptance criteria before this is an analysis-ready current-regime classifier:**
+1. OHLCV data-quality checks pass (skill §8a).
+2. Generate the causal `regime_labels.csv`.
+3. Profile label distribution, regime durations, and transition frequencies (sanity check — not
+   performance tuning).
+4. Pass classifier unit tests (§33.2) and slice-invariance tests (§33.3).
+5. Validate warmup and inclusive-boundary (ADX=25, P70) behavior on real data.
+
+Only after 1–5 may Phase 3 treat this as a validated current-regime classifier rather than a spec.

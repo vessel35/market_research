@@ -4,6 +4,11 @@
 Phase 4 outputs are for Phase 3 ONLY; they are never used in Phase 2 and never modify Phase 2
 artifacts. `regime_labeling=causal`; `llm_discretion_used=false`.
 
+**Readiness:** this run is a methodology spec (no `regime_labels.csv` yet). Phase 3 may rely on
+this *contract/spec*, but must not draw regime-conditional conclusions or hybrid/no-trade
+decisions until the labels are generated and empirically validated (see `phase4_final_report.md`
+§35.13 — minimum acceptance criteria).
+
 ## 1. Files Phase 3 reads
 
 From `reports/phase4_market_regime/20260613_0558/`:
