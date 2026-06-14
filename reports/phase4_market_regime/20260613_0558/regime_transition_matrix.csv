@@ -1,0 +1,6 @@
+from_to,strong_up,strong_down,transition,volatile,range
+strong_up,37506,7,659,342,942
+strong_down,5,40465,894,378,799
+transition,357,473,7585,368,747
+volatile,418,469,122,22768,1089
+range,1169,1127,270,1010,90257

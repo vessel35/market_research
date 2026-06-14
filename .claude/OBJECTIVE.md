@@ -9,10 +9,11 @@ frameworks, select exactly ONE primary framework via a scored matrix, and author
 Stage A (current-regime classification) is the required objective; Stage B (future prediction)
 is optional.
 
-**Data path:** none (spec-only run 2026-06-13 — no OHLCV present in repo; `regime_labels.csv` waived per "if data present", `data-agent`/data-quality not run)
+**Data path:** /home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv (ETH/USDT 5m OHLCV; 2024-01-01 ~ 2025-12-31; 210,528 bars) — supplied 2026-06-14; data-present acceptance run
 **Optional data:** none
-**Period:** 2024-01-01 ~ 2025-12-31 (reference period; no data loaded this run)
-**Run dir:** reports/phase4_market_regime/20260613_0558/
+**Period:** 2024-01-01 ~ 2025-12-31 (full coverage in data)
+**Run dir:** reports/phase4_market_regime/20260613_0558/ (data-present execution added on top of the methodology spec)
+**Compute:** /home/vessel/workspace/trading-system/.venv/bin/python (pandas 2.1.4, numpy 1.26.3, scipy; no TA-Lib)
 
 **In scope:**
 - Theory-based framework survey across the 5 families (trend-strength, volatility,

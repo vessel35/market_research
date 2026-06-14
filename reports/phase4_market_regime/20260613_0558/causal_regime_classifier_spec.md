@@ -89,6 +89,13 @@ Strictly trailing — no centered window, no whole-sample percentile. Before `W_
 history exist, the bar is treated as warmup (§9). The P70 cutoff is a fixed convention, not a
 train-only fit and not tuned to performance.
 
+**Implementation note (data-present run, 2026-06-14):** the percentile is computed with pandas
+`rolling(2016, min_periods=288).rank(pct=True)` (= count(window ≤ x)/len, average ties) — a
+negligible (<0.04%) difference from the `(count−1)/(len−1)` form above; both are strictly trailing
+(bars ≤ t) and causal. Effective warmup is **301 bars** (ATR(14) first valid ~bar 14, and
+`volatility_score` then needs `min_periods=288` further ATR values), slightly beyond the nominal
+`warmup_end=288`; the NaN-gate in §9 handles this correctly (those rows → `unknown_or_warmup`).
+
 ## 9. Classifier pseudocode
 
 BEGIN_PSEUDOCODE

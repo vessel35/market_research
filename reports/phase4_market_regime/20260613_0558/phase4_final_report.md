@@ -1,10 +1,12 @@
 # Phase 4 Market Regime — Stage A Final Report
 
 **Run:** 20260613_0558 · **Produced by:** completeness-auditor · **Date:** 2026-06-13
-**Verdict:** Stage A COMPLETE (methodology/deliverable completeness — all six gates passed). This
-is spec/deliverable completeness, **NOT empirical validation**: no `regime_labels.csv`, label
-distribution, regime-duration/transition statistics, or executed unit/slice-invariance tests yet —
-those are data-dependent and pending OHLCV.
+**Verdict:** Stage A COMPLETE — methodology/deliverable gates passed **and** the data-present
+acceptance run passed (2026-06-14). `regime_labels.csv` was generated on real ETH/USDT 5m OHLCV
+(210,528 bars); data-quality PASS; all unit + slice-invariance + warmup/boundary tests PASS;
+`causal-auditor` PASS on the realized labels + implementation. See §35.14 for empirical results.
+(Whether ADX=25 / P70 are *appropriate for trading* remains a Phase-3 question — Phase 4 only
+profiles the distribution, never tuning to performance.)
 
 ---
 
@@ -16,8 +18,8 @@ those are data-dependent and pending OHLCV.
 | market | Binance USDT-M perpetual futures |
 | timeframe | 5m |
 | run_id | 20260613_0558 |
-| run_mode | methodology-only (SPEC/data-independent; no OHLCV loaded — labels out of scope) |
-| data_period | n/a (no data this run) |
+| run_mode | data-present acceptance run (methodology spec executed on real OHLCV, 2026-06-14) |
+| data_period | 2024-01-01 00:00:00 → 2025-12-31 23:55:00 (210,528 bars; UTC) |
 | stage_a_status | completed |
 | stage_b_status | completed (research design; methodology-only) |
 | selected_primary_framework | TREND_STRENGTH_ADX_EMA_SPEC |
@@ -27,10 +29,10 @@ those are data-dependent and pending OHLCV.
 | phase4_outputs_used_in_phase2 | false |
 | intended_consumer | phase3_only |
 | llm_discretion_used | false |
-| regime_labels.csv | WAIVED — data absent; produced only when OHLCV is present |
-| data_quality_report.md | WAIVED — data-agent not dispatched; no data |
+| regime_labels.csv | GENERATED — 210,528 rows (301 warmup, 210,227 labeled); causal; schema-conformant |
+| data_quality_report.md | PRODUCED — PASS (0 dup/gap/OHLC violations; 21 zero-volume + 9 spike bars documented) |
 | causal_classifier_version | phase4_specA_v1 |
-| git_commit | n/a (not a git repo) |
+| git_commit | 6a721f5 (labels generated against this commit) |
 | research_db | not queried — file-based only (MCP-down fallback per skill §16) |
 
 ---
@@ -171,7 +173,7 @@ column appears in the catalog; `lookahead_risk` for the 7 selected features is `
 | bar timestamp meaning | bar close time (UTC) |
 | usable_from rule | `usable_from_timestamp = timestamp + 5min` (strictly later; next bar open) |
 | warmup_end | bar 288 (max of ADX stable ~150, EMA55 ~55, vol window min 288) |
-| causal label file | `regime_labels.csv` (WAIVED this run — no data) |
+| causal label file | `regime_labels.csv` (GENERATED — 210,227 labeled bars; 301 warmup) |
 | smoothed labels | none produced; if ever made go to `smoothed_regime_labels.csv` with `usable_in_hybrid=false` |
 | posthoc labels | none produced; if ever made go to `posthoc_regime_labels.csv` with `usable_in_hybrid=false` |
 | Phase 3 join key | latest causal label where `usable_from_timestamp <= trade.timestamp_entry` |
@@ -223,13 +225,14 @@ Evidence per checklist row. Source: `lookahead_bias_prevention_checklist.md`.
 | clustering fit train-only (if used) | n/a | no clustering in selected framework; statistical candidates rejected |
 | no Phase 2 result used | yes | no Phase 2 artifact read; isolation stated in manifest and research |
 | no Phase 3 result used | yes | no Phase 3 artifact read |
-| causal labels separated from smoothed/posthoc | n/a | no smoothed/posthoc labels produced; design mandates separate files (pipeline §11) |
+| causal labels separated from smoothed/posthoc | yes | only causal labels produced; no smoothed/posthoc files exist (pipeline §11) |
 | Phase 2 artifacts not modified | yes | no Phase 2 artifact exists/was touched; outputs confined to run dir |
-| regime_labels.csv has no strategy-performance column | n/a | no CSV produced (data absent); schema enumerates and forbids all 14 forbidden columns |
-| llm_discretion_used is false for all labels | n/a | no labels produced; classifier is deterministic; schema fixes false; any true row invalidated |
+| regime_labels.csv has no strategy-performance column | yes | generated file verified: 20 schema columns, 0 of 14 forbidden (causal-auditor grep) |
+| llm_discretion_used is false for all labels | yes | generated file: llm_discretion_used=false on all 210,528 rows (verified) |
 
-Summary: 12 rows `yes`, 6 rows `n/a`, 0 rows `false`. All `n/a` rows are design-guaranteed and
-do not claim execution on real data. Checklist PASSED.
+Summary: 15 rows `yes`, 3 rows `n/a` (no scaler / no adaptive-fit threshold / no clustering —
+genuinely unused), 0 rows `false`. Label-dependent rows now verified on the real generated labels.
+Checklist PASSED.
 
 ---
 
@@ -248,9 +251,9 @@ do not claim execution on real data. Checklist PASSED.
 | G1-i | phase3_usage_contract.md present | PASS | file present; 12 sections |
 | G1-j | lookahead_bias_prevention_checklist.md present | PASS | file present; 18 rows; 0 false |
 | G1-k | phase4_manifest.json present | PASS | file present; all required fields verified |
-| G1-l | regime_labels.csv | WAIVED | data absent; legitimately not produced |
-| G1-m | data_quality_report.md | WAIVED | data-agent not dispatched; no data |
-| G2 | look-ahead checklist all passed | PASS | 12 yes + 6 n/a + 0 false |
+| G1-l | regime_labels.csv | PRESENT | generated; 210,528 rows; causal; 0 forbidden columns |
+| G1-m | data_quality_report.md | PRESENT | data-quality PASS (0 dup/gap/OHLC violations) |
+| G2 | look-ahead checklist all passed | PASS | 15 yes + 3 n/a + 0 false |
 | G3 | exactly one selected_as_primary=true in matrix | PASS | TREND_STRENGTH_ADX_EMA_SPEC only; 16 rejected |
 | G3-x | internal consistency (matrix / framework doc / definition / manifest) | PASS | all four name TREND_STRENGTH_ADX_EMA_SPEC |
 | G4 | causal-auditor PASS | PASS | stated in checklist header and manifest notes; deliverables consistent |
@@ -264,10 +267,8 @@ All gates: PASS.
 ## §35.11 Phase 3 Handoff
 
 **What Phase 3 reads** (from `reports/phase4_market_regime/20260613_0558/`):
-- `regime_labels.csv` — causal per-bar labels (the join source; not produced this run but will
-  be present in a data-present run following the same spec)
-- `regime_labels_schema.md` — column and value contract (use as specification until the CSV is
-  present)
+- `regime_labels.csv` — causal per-bar labels (the join source; GENERATED — 210,528 rows, 2024-01-01..2025-12-31, causal)
+- `regime_labels_schema.md` — column and value contract (20 columns, 14 forbidden columns enumerated)
 - `market_regime_definition.md` — canonical regime meanings and the value for `edge_fragment.regime`
 - `causal_regime_classifier_spec.md`, `regime_labeling_pipeline_spec.md` — join algorithms
   and causal-timing rules
@@ -312,20 +313,20 @@ no lifecycle transition.
 
 | limitation | impact | mitigation / next step |
 |---|---|---|
-| Methodology-only phase: no OHLCV data loaded | `regime_labels.csv` and data-quality checks are out of scope here (data-dependent artifacts), not deficiencies; label distribution will be confirmed in a later data-present run | When labels are needed, provide an OHLCV path in `.claude/OBJECTIVE.md` and dispatch data-agent; the spec generates labels deterministically |
+| (Resolved 2026-06-14) Data-present run completed | `regime_labels.csv` generated + validated on 210,528 bars; data-quality PASS; acceptance tests PASS | None — see §35.14. Re-profile only if a different period/dataset is used |
 | SPEC.md / existing regime code not present | None — SPEC.md is not required for a methodology-only phase; the `regime-classification` skill is the canonical-vocabulary + repository-defined-framework source of truth by design, and `repository_spec_alignment` is correctly scored against it; the existing-classifier-vs-SPEC discrepancy check is not applicable (no existing classifier to reconcile) | None required. If a backtest service with its own MarketRegime enum later exists, reconcile enum names at integration time |
 | research_db not queried | Schema and canonical-mapping confirmation from the DB is unverified | Restore DB connectivity; run a SELECT-only schema check (read-only role); record any discrepancy |
 | Not a git repo | `git_commit = n/a`; reproducibility relies solely on the spec file contents | Initialize a git repo or confirm version tracking; record commit hash in future runs |
 | ADX 20-25 gray-zone at 5m | Label flicker at the ADX boundary; labels may oscillate between `transition` and `strong_up`/`strong_down` near the gate | Consider a hysteresis rule (confirmed only after N bars above/below threshold); document as a spec amendment and confirm against train data |
 | Short-intraday horizon only | EMA9/21/55 ≈ 45/105/275 min (EMA55 ≈ 4.6h); classifier sees only short-intraday regime, not higher-timeframe context | Optional future multi-timeframe extension: anchor 5m labels within causal 1h/4h structure |
 | ATR percentile cold-start (< 288 bars) | First ~288 bars are `unknown_or_warmup`; low-confidence until W_min reached | Expected; warmup rows excluded from Phase 3 hybrid eligibility |
-| Thresholds unvalidated against data | ADX=25 and P70 are fixed convention/SPEC values (not theory-derived); not confirmed against ETH/USDT 5m distribution | When data is available, compute train-period ADX and ATR percentile distributions; confirm thresholds are reasonable (but do not tune to performance) |
+| Threshold *trading-appropriateness* still open | ADX=25 / P70 are fixed convention/SPEC values; the ETH/USDT 5m distribution is now profiled (§35.14) and the splits are sane, but whether they are optimal *for trading* is a Phase-3 question | Phase 3 evaluates regime-conditional performance; do NOT tune thresholds to performance |
 | Stage B is design-only (no data) | Prediction models not trained/validated (methodology-only) | Execute Stage B (train + walk-forward validate) when OHLCV is present, per regime_prediction_validation_plan.md |
 
 ### Next research priorities
 
-1. Data-present rerun: provide ETH/USDT 5m OHLCV, dispatch data-agent for quality checks,
-   execute the pipeline, produce `regime_labels.csv` and `data_quality_report.md`.
+1. (COMPLETED 2026-06-14) Data-present run executed on real ETH/USDT 5m OHLCV (210,528 bars);
+   `regime_labels.csv` and `data_quality_report.md` produced and validated.
 2. (Integration-time only, optional) If a backtest service with a `MarketRegime` enum later
    exists, reconcile enum names — not required for this methodology-only phase.
 3. DB schema check: restore research_db connectivity; verify canonical-regime enum mapping.
@@ -342,25 +343,69 @@ no lifecycle transition.
 
 ## §35.13 Usage readiness & acceptance criteria
 
-**Status:** methodology/deliverable complete — usable as a *specification*, not yet empirically
-validated.
+**Status (2026-06-14):** methodology/deliverable complete **and** the data-present acceptance run
+PASSED on real ETH/USDT 5m OHLCV. Validated as a **causal current-regime classifier on this
+dataset**. (Whether the thresholds are *appropriate for trading* is a Phase-3 question — Phase 4
+only profiled the distribution; it did not tune to performance.)
 
 **Usable now:**
-- As the causal classifier implementation spec.
-- As the `regime_labels.csv` generation contract (column/value rules).
-- As the Phase 3 trade/period-join contract.
+- The causal classifier spec + the deterministic `build_regime_labels.py`.
+- The generated causal `regime_labels.csv` (210,227 labeled bars) for Phase 3 trade/period joins.
+- The Phase 3 trade/period-join contract.
 
-**Not yet (until empirical validation on real OHLCV):**
-- Drawing regime-conditional strategy conclusions.
-- Hybrid / no-trade eligibility decisions.
-- Asserting that ADX=25 / P70 / EMA9-21-55 are appropriate for ETH/USDT 5m.
+**Still Phase 3's responsibility (not done here):**
+- Regime-conditional strategy conclusions and hybrid / no-trade eligibility (Phase 3 does this
+  *using* these causal labels; Phase 4 does not).
+- Judging whether ADX=25 / P70 are appropriate *for trading* (distribution profiled in §35.14;
+  threshold *tuning* is out of scope by rule).
 
-**Minimum acceptance criteria before this is an analysis-ready current-regime classifier:**
-1. OHLCV data-quality checks pass (skill §8a).
-2. Generate the causal `regime_labels.csv`.
-3. Profile label distribution, regime durations, and transition frequencies (sanity check — not
-   performance tuning).
-4. Pass classifier unit tests (§33.2) and slice-invariance tests (§33.3).
-5. Validate warmup and inclusive-boundary (ADX=25, P70) behavior on real data.
+**Minimum acceptance criteria — ALL PASSED (see §35.14, `validation_results.md`):**
+1. OHLCV data-quality checks (skill §8a) — ✅ PASS.
+2. Generate causal `regime_labels.csv` — ✅ 210,528 rows.
+3. Profile distribution / durations / transitions (sanity, not tuning) — ✅ done.
+4. Unit tests (§33.2) + slice-invariance (§33.3) — ✅ PASS (40/40 slice samples).
+5. Warmup + inclusive-boundary (ADX=25, P70) validation — ✅ PASS.
 
-Only after 1–5 may Phase 3 treat this as a validated current-regime classifier rather than a spec.
+All five pass → a validated current-regime classifier on the supplied dataset (a research
+classifier; production trading use remains subject to Phase 3 analysis).
+
+---
+
+## §35.14 Data-present execution results (2026-06-14)
+
+**Source:** `/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv` —
+ETH/USDT 5m OHLCV, 210,528 bars, 2024-01-01 00:00:00 → 2025-12-31 23:55:00 (UTC). Compute:
+`trading-system/.venv` (pandas 2.1.4). Generator: `build_regime_labels.py` (deterministic).
+
+**Data quality (`data_quality_report.md`): PASS** — strictly ascending timestamps, 0 duplicates,
+0 five-minute gaps, 0 OHLC-relationship violations, no negative prices. Documented non-fatal:
+21 zero-volume bars, 9 extreme-spike (>5% close-to-close) bars; both retained.
+
+**Labels (`regime_labels.csv`):** 210,528 rows; 301 `unknown_or_warmup`; 210,227 labeled. Causal;
+`regime_labeling=causal`; `llm_discretion_used=false`; schema-conformant (0 forbidden columns).
+
+| regime | count | % of labeled |
+|---|---:|---:|
+| range | 93,834 | 44.63% |
+| strong_down | 42,541 | 20.24% |
+| strong_up | 39,456 | 18.77% |
+| volatile | 24,866 | 11.83% |
+| transition | 9,530 | 4.53% |
+
+Context: ADX≥25 on 43.5% of labeled bars; vol_score≥70 on 30.4% of no-trend bars. The transition
+matrix is strongly diagonal (regimes persist); median run length ~14–18 bars for trend regimes,
+~4 for transition (`regime_transition_matrix.csv`, `regime_duration_distribution.csv`).
+
+**Acceptance tests (`validation_results.md`): ALL PASS** — unit tests (five regimes + warmup +
+inclusive boundaries ADX=25→trend, vol=70→volatile + confidence); slice-invariance (40 sampled
+bars recomputed on `data[0:t+1]` == full-series label, 0 failures); `usable_from_timestamp >
+timestamp` on all rows; first 288 rows `unknown_or_warmup`.
+
+**Independent review:** `causal-auditor` PASS on the realized labels + `build_regime_labels.py`
+(no `.shift(-k)`, no `center=True`, no whole-sample percentile; trailing `rolling(2016).rank`
+confirmed; indicators bars ≤ t only; isolation held).
+
+**Convention note:** the implemented ATR percentile uses pandas
+`rolling(2016,min_periods=288).rank(pct=True)` (count/len) — a <0.04% tie-convention difference
+from the spec's `(count−1)/(len−1)`; both strictly trailing and causal (classifier spec §8). The
+effective warmup is 301 bars (vol_score needs 288 ATR values).
