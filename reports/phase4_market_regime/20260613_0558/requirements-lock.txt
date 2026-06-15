@@ -1,12 +1,22 @@
-# Phase 4 run 20260613_0558 — fuller pinned dependency set (Python 3.12; tested 3.12.13).
-# Captured from the executing venv via importlib.metadata (the venv is uv-managed, no pip freeze).
-# Recreate: python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements-lock.txt
-# This pins the Phase 4 libraries + their key transitive deps. It does NOT guarantee
-# cross-ARCHITECTURE bit-identical XGBoost output — see REPRODUCE.md "Determinism notes".
+# Phase 4 run 20260613_0558 — best-effort pinned dependency set (Python 3.12; tested 3.12.13).
+# Captured from the executing venv via importlib.metadata (the venv is uv-managed; pip freeze
+# unavailable). Recreate:
+#   python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements-lock.txt
+#
+# Scope / limits — this is NOT a complete hash-pinned lock:
+#  - Pins the Phase 4 libraries + their key runtime transitive deps, including narwhals
+#    (a hard runtime dependency of scikit-learn 1.9).
+#  - Does NOT pin platform-conditional deps: e.g. xgboost pulls nvidia-nccl-cu12 on Linux x86_64
+#    ONLY (excluded on macOS/aarch64); pinning it unconditionally here would break those installs.
+#  - Does NOT guarantee cross-ARCHITECTURE bit-identical XGBoost output (see REPRODUCE.md
+#    "Determinism notes").
+#  - For a GUARANTEED, fully-resolved, hash-pinned lock, use `uv pip compile` / `uv.lock` /
+#    `pip-compile --generate-hashes`, or a Dockerfile (network + tooling not available in this run).
 pandas==2.1.4
 numpy==1.26.3
 scipy==1.16.3
 scikit-learn==1.9.0
+narwhals==2.22.1
 lightgbm==4.6.0
 xgboost==2.1.4
 joblib==1.5.3

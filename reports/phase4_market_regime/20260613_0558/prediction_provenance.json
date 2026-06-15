@@ -27,11 +27,11 @@
     "48": 105048
   },
   "outputs_sha256": {
+    "_note": "sha256 of the deterministic generated artifacts + generator scripts only. Narrative/report docs (regime_prediction_results.md, REPRODUCE.md) are git-versioned and intentionally NOT content-hashed here: git already content-addresses committed files, and these docs are edited for wording across reviews, so hashing them in provenance is brittle. Gitignored data artifacts are hashed under reproducible_prediction_matrices and forecast_artifact.files.",
     "build_prediction_labels.py": "9bb0f7652b209207da6dd4c812a4938ab1f3284a1804c21ab65ecb25367bad97",
     "train_predict_regime.py": "f81d2f8387fae701222e27dbeb17fee5ebd68a77cc838634f4125fa931a6c433",
     "prediction_metrics.json": "697afa707049fd8a112dc61c3d432a99f8fde76720e1920f0d7d7115460e762c",
     "prediction_matrix_manifest.json": "a0ab816c8233e575dbf268a60d6eabd37909ed2c5cd16637c3d1616827a0d79a",
-    "regime_prediction_results.md": "8e637f931675c66335abfc59e2f6cb3b1d89b068e107841033e5f4955f4c6c71",
     "prediction_provenance.json": null
   },
   "reproducible_prediction_matrices": {
