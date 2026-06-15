@@ -1,0 +1,17 @@
+# Phase 4 run 20260613_0558 — fuller pinned dependency set (Python 3.12; tested 3.12.13).
+# Captured from the executing venv via importlib.metadata (the venv is uv-managed, no pip freeze).
+# Recreate: python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements-lock.txt
+# This pins the Phase 4 libraries + their key transitive deps. It does NOT guarantee
+# cross-ARCHITECTURE bit-identical XGBoost output — see REPRODUCE.md "Determinism notes".
+pandas==2.1.4
+numpy==1.26.3
+scipy==1.16.3
+scikit-learn==1.9.0
+lightgbm==4.6.0
+xgboost==2.1.4
+joblib==1.5.3
+threadpoolctl==3.6.0
+python-dateutil==2.9.0.post0
+pytz==2026.2
+tzdata==2026.2
+six==1.17.0

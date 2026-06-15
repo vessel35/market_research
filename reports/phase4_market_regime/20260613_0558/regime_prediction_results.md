@@ -234,7 +234,7 @@ lookahead misread (treating a forecast keyed at bar t as if it were known at or 
 matching it bit-for-bit to the metrics `T3b_xgboost.accuracy` at every horizon.
 
 Per-file size and sha256 are recorded in `prediction_provenance.json` under
-`forecast_artifact.files` (committed=false, regenerable=true). These files are gitignored.
+`forecast_artifact.files` (committed=true, regenerable=true). These files **are committed** (~13MB).
 
 **Usage scope (re-emphasized).** This forecast is AUXILIARY and PROBABILISTIC. It is NEVER a
 Phase 3 current-regime label and NEVER a hybrid-eligibility basis; the sole current-regime basis
@@ -253,10 +253,16 @@ BEGIN_JSON
   "metrics_file": "prediction_metrics.json",
   "provenance_file": "prediction_provenance.json",
   "forecast_files": "regime_forecast_h{3,6,12,24,48}.csv.gz",
-  "matrices_byte_reproducible": "yes (gzip mtime=0, empty FNAME; two regenerations produce identical sha256)"
+  "matrices_byte_reproducible": "yes (gzip mtime=0, empty FNAME; two regenerations produce identical sha256)",
+  "forecasts_cross_platform_bit_identical": "no (XGBoost output; byte-identical same-arch only; cross-platform metrics match ~3 decimals, not bit-exact)"
 }
 END_JSON
 
-Note: the `prediction_matrix_h*.csv.gz` and `regime_forecast_h*.csv.gz` files are now byte-
-reproducible (gzip written with mtime=0 and an empty filename header), so a second regeneration
-yields the IDENTICAL sha256. They remain gitignored (regenerable; matrices ~72MB total).
+Note: the gzip CONTAINER is byte-reproducible (mtime=0 + empty FNAME). The
+`prediction_matrix_*.csv.gz` (rule-based, derived only from `regime_labels.csv`) regenerate
+byte-identically — verified vs the provenance sha256, including by an external reviewer on a
+different machine — and are **gitignored** (~72MB, regenerable). The `regime_forecast_*.csv.gz`
+are **committed** (~13MB) but are XGBoost output: byte-identical only on the same OS/architecture;
+cross-platform the T3b numbers can differ ~1e-3 (see REPRODUCE.md "Determinism notes"). The
+reproducibility anchors are the input/label sha256 + metrics-to-tolerance, not the forecast bytes
+across machines.
