@@ -246,13 +246,13 @@ long horizons (h>=24) it carries no lift over trivial persistence on macro-F1.
 
 BEGIN_JSON
 {
-  "build": "python build_prediction_labels.py --labels regime_labels.csv --outdir . --horizons 3,6,12,24,48",
-  "train": "python train_predict_regime.py --features . --outdir . --seed 42 --horizons 3,6,12,24,48",
+  "build": "python stage_b_prediction/scripts/build_prediction_labels.py --labels stage_a_current_regime/outputs/regime_labels.csv --outdir stage_b_prediction/outputs --horizons 3,6,12,24,48",
+  "train": "python stage_b_prediction/scripts/train_predict_regime.py --features stage_b_prediction/outputs --outdir stage_b_prediction/outputs --seed 42 --horizons 3,6,12,24,48",
   "seed": 42,
   "python": "/home/vessel/workspace/trading-system/.venv/bin/python",
-  "metrics_file": "prediction_metrics.json",
-  "provenance_file": "prediction_provenance.json",
-  "forecast_files": "regime_forecast_h{3,6,12,24,48}.csv.gz",
+  "metrics_file": "stage_b_prediction/outputs/prediction_metrics.json",
+  "provenance_file": "stage_b_prediction/outputs/prediction_provenance.json",
+  "forecast_files": "stage_b_prediction/outputs/regime_forecast_h{3,6,12,24,48}.csv.gz",
   "matrices_byte_reproducible": "yes (gzip mtime=0, empty FNAME; two regenerations produce identical sha256)",
   "forecasts_cross_platform_bit_identical": "no (XGBoost output; byte-identical same-arch only; cross-platform metrics match ~3 decimals, not bit-exact)"
 }
@@ -263,6 +263,6 @@ Note: the gzip CONTAINER is byte-reproducible (mtime=0 + empty FNAME). The
 byte-identically — verified vs the provenance sha256, including by an external reviewer on a
 different machine — and are **gitignored** (~72MB, regenerable). The `regime_forecast_*.csv.gz`
 are **committed** (~13MB) but are XGBoost output: byte-identical only on the same OS/architecture;
-cross-platform the T3b numbers can differ ~1e-3 (see REPRODUCE.md "Determinism notes"). The
+cross-platform the T3b numbers can differ ~1e-3 (see `reproducibility/REPRODUCE.md` "Determinism notes"). The
 reproducibility anchors are the input/label sha256 + metrics-to-tolerance, not the forecast bytes
 across machines.

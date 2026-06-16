@@ -1,6 +1,6 @@
 {
   "generated_at": "2026-06-14",
-  "generator_script": "build_regime_labels.py",
+  "generator_script": "stage_a_current_regime/scripts/build_regime_labels.py",
   "git_commit": "6a721f5",
   "input_data_path": "/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv",
   "input_data_sha256": "0a4edf3197863d38838acbcf5b8b684a77700ffb67221dd9ecdeec000bc4a67a",

@@ -1,5 +1,5 @@
 {
-  "source_labels": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/regime_labels.csv",
+  "source_labels": "stage_a_current_regime/outputs/regime_labels.csv",
   "source_labels_sha256": "1b6e128cb1751cdd75cd00fd5cec48fe1f2a61e8f071a433d611648a51a7751d",
   "n_rows_total": 210528,
   "feature_columns": [
@@ -59,7 +59,7 @@
   ],
   "per_horizon": {
     "3": {
-      "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h3.csv.gz",
+      "path": "stage_b_prediction/outputs/prediction_matrix_h3.csv.gz",
       "n_rows": 210213,
       "n_features": 27,
       "label_distribution": {
@@ -72,7 +72,7 @@
       "sha256": "362e6ccc058a305b75abdc6606404104036fc88d0dae6a67da45e417272ab50d"
     },
     "6": {
-      "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h6.csv.gz",
+      "path": "stage_b_prediction/outputs/prediction_matrix_h6.csv.gz",
       "n_rows": 210210,
       "n_features": 27,
       "label_distribution": {
@@ -85,7 +85,7 @@
       "sha256": "41c589e72ad14c43475694fc15bf6ae46ea652c3983808d1facd2cac34374ec6"
     },
     "12": {
-      "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h12.csv.gz",
+      "path": "stage_b_prediction/outputs/prediction_matrix_h12.csv.gz",
       "n_rows": 210204,
       "n_features": 27,
       "label_distribution": {
@@ -98,7 +98,7 @@
       "sha256": "5e79be2fc67ec64fdbbf77f0360de16cef4481d0b6b4b5079cc3a503a0e21d2b"
     },
     "24": {
-      "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h24.csv.gz",
+      "path": "stage_b_prediction/outputs/prediction_matrix_h24.csv.gz",
       "n_rows": 210192,
       "n_features": 27,
       "label_distribution": {
@@ -111,7 +111,7 @@
       "sha256": "90e464cbbe96cfe6c885f6c772fff6e5c031a2fb2235c19c830c908c73eb08e4"
     },
     "48": {
-      "path": "/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/prediction_matrix_h48.csv.gz",
+      "path": "stage_b_prediction/outputs/prediction_matrix_h48.csv.gz",
       "n_rows": 210168,
       "n_features": 27,
       "label_distribution": {

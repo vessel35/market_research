@@ -11,19 +11,23 @@ Both use the recursion S[t] = S[t-1] - S[t-1]/P + X[t] (alpha = 1/P).
 
 Usage
 -----
-  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv
-  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv \\
-      --outdir /path/to/run_dir --git-commit 6a721f5
+  python stage_a_current_regime/scripts/build_regime_labels.py \\
+      --input /path/to/ETHUSDT_futures_5min.csv \\
+      --outdir stage_a_current_regime/outputs \\
+      --git-commit 6a721f5
 
   # Portable label — write basename as source_data_path column:
-  python build_regime_labels.py --input /path/to/ETHUSDT_futures_5min.csv \\
+  python stage_a_current_regime/scripts/build_regime_labels.py \\
+      --input /path/to/ETHUSDT_futures_5min.csv \\
+      --outdir stage_a_current_regime/outputs \\
       --source-data-path-label ETHUSDT_futures_5min.csv
 
 Environment variable shorthand:
-  PHASE4_OHLCV=/path/to/ETHUSDT_futures_5min.csv python build_regime_labels.py
+  PHASE4_OHLCV=/path/to/ETHUSDT_futures_5min.csv \\
+      python stage_a_current_regime/scripts/build_regime_labels.py
 
 Defaults:
-  --outdir   : directory containing this script (Path(__file__).resolve().parent)
+  --outdir   : <stage_a_current_regime>/outputs
   --git-commit : auto-detected via `git -C <outdir> rev-parse --short HEAD`,
                  fallback "unknown"
   --source-data-path-label : basename of --input (e.g. ETHUSDT_futures_5min.csv)
@@ -61,9 +65,9 @@ def parse_args():
         description="Phase 4 Stage A — generate causal regime_labels.csv from OHLCV data.",
         epilog=(
             "Example:\n"
-            "  python build_regime_labels.py \\\n"
+            "  python stage_a_current_regime/scripts/build_regime_labels.py \\\n"
             "      --input /data/ETHUSDT_futures_5min.csv \\\n"
-            "      --outdir /results/20260613_0558 \\\n"
+            "      --outdir stage_a_current_regime/outputs \\\n"
             "      --git-commit 6a721f5 \\\n"
             "      --source-data-path-label ETHUSDT_futures_5min.csv\n\n"
             "Environment variable PHASE4_OHLCV is used as --input default if set."
@@ -85,7 +89,7 @@ def parse_args():
         metavar="PATH",
         help=(
             "Output directory for all generated files. "
-            "Defaults to the directory containing this script."
+            "Defaults to <stage_a_current_regime>/outputs."
         ),
     )
     parser.add_argument(
@@ -138,7 +142,7 @@ def resolve_paths(args):
     if args.outdir is not None:
         run_dir = Path(args.outdir).resolve()
     else:
-        run_dir = Path(__file__).resolve().parent
+        run_dir = Path(__file__).resolve().parent.parent / "outputs"
 
     if args.git_commit is not None:
         git_commit = args.git_commit
@@ -202,7 +206,7 @@ def write_provenance(
 
     prov = {
         "generated_at": generated_at,
-        "generator_script": "build_regime_labels.py",
+        "generator_script": "stage_a_current_regime/scripts/build_regime_labels.py",
         "git_commit": git_commit,
         "input_data_path": ohlcv_path,
         "input_data_sha256": sha256_of_file(ohlcv_path),

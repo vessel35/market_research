@@ -13,13 +13,16 @@ labels); judging whether the thresholds are appropriate *for trading* is also Ph
 ## 1. Files Phase 3 reads
 
 From `reports/phase4_market_regime/20260613_0558/`:
-- `regime_labels.csv` — the causal per-bar labels (the join source). **Generated** (210,528 rows);
-  follows `regime_labels_schema.md` exactly.
-- `regime_labels_schema.md` — column + value contract for the existing `regime_labels.csv`.
-- `market_regime_definition.md` — canonical regime meanings + the value to use for
+- `stage_a_current_regime/outputs/regime_labels.csv` — the causal per-bar labels (the join source).
+  **Generated** (210,528 rows); follows `stage_a_current_regime/docs/regime_labels_schema.md`
+  exactly.
+- `stage_a_current_regime/docs/regime_labels_schema.md` — column + value contract for the existing
+  `regime_labels.csv`.
+- `stage_a_current_regime/docs/market_regime_definition.md` — canonical regime meanings + the value to use for
   `edge_fragment.regime`.
-- `causal_regime_classifier_spec.md`, `regime_labeling_pipeline_spec.md` — join algorithms and
-  causal-timing rules.
+- `stage_a_current_regime/docs/causal_regime_classifier_spec.md` and
+  `stage_a_current_regime/docs/regime_labeling_pipeline_spec.md` — join algorithms and causal-timing
+  rules.
 Phase 3 must NOT read Phase 2 result artifacts to "derive" regimes — it uses these labels only.
 
 ## 2. Canonical regimes Phase 3 uses

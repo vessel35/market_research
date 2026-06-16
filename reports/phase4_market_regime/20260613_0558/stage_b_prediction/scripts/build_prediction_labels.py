@@ -7,10 +7,13 @@ CAUSAL CONTRACT (see regime_prediction_label_spec.md):
   * Drop rows where regime[t] is warmup, where regime[t+h] is unknown_or_warmup, or t+h past end.
 
 This script reads ONLY the Stage A causal file regime_labels.csv. No Phase 2/3 artifact, no DB.
-Deterministic; no randomness. Writes one compact parquet matrix per horizon under --outdir.
+Deterministic; no randomness. Writes one compact gzip CSV matrix per horizon under --outdir.
 
 Usage:
-  build_prediction_labels.py --labels regime_labels.csv --outdir . --horizons 3,6,12,24,48
+  python stage_b_prediction/scripts/build_prediction_labels.py \\
+      --labels stage_a_current_regime/outputs/regime_labels.csv \\
+      --outdir stage_b_prediction/outputs \\
+      --horizons 3,6,12,24,48
 """
 import argparse
 import gzip

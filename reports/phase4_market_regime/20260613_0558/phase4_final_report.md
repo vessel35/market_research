@@ -8,6 +8,9 @@ acceptance run passed (2026-06-14). `regime_labels.csv` was generated on real ET
 (Whether ADX=25 / P70 are *appropriate for trading* remains a Phase-3 question — Phase 4 only
 profiles the distribution, never tuning to performance.)
 
+**Artifact layout:** files are organized under Stage A, Stage B, Phase 3 handoff, and
+reproducibility folders. Use `INDEX.md` for current artifact paths.
+
 ---
 
 ## §35.1 Run Summary

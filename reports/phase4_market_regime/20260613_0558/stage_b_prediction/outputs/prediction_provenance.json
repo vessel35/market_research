@@ -3,7 +3,7 @@
   "generated_at": "2026-06-14T13:41:05.648106+00:00",
   "git_commit": "f0f6753",
   "random_seed": 42,
-  "input_regime_labels": "regime_labels.csv",
+  "input_regime_labels": "stage_a_current_regime/outputs/regime_labels.csv",
   "input_regime_labels_sha256": "1b6e128cb1751cdd75cd00fd5cec48fe1f2a61e8f071a433d611648a51a7751d",
   "rows_used_per_horizon": {
     "3": 210213,
@@ -28,10 +28,10 @@
   },
   "outputs_sha256": {
     "_note": "sha256 of the deterministic generated artifacts + generator scripts only. Narrative/report docs (regime_prediction_results.md, REPRODUCE.md) are git-versioned and intentionally NOT content-hashed here: git already content-addresses committed files, and these docs are edited for wording across reviews, so hashing them in provenance is brittle. Gitignored data artifacts are hashed under reproducible_prediction_matrices and forecast_artifact.files.",
-    "build_prediction_labels.py": "9bb0f7652b209207da6dd4c812a4938ab1f3284a1804c21ab65ecb25367bad97",
-    "train_predict_regime.py": "f81d2f8387fae701222e27dbeb17fee5ebd68a77cc838634f4125fa931a6c433",
+    "build_prediction_labels.py": "0ce09a39d6ae9b994f59faa6676b21c69f72a0a4e49d56f4ff14890afa818773",
+    "train_predict_regime.py": "5da3005a816a4f518bc52d5e4c4446383bd50fd88ab99e455edddeaac2a408b2",
     "prediction_metrics.json": "697afa707049fd8a112dc61c3d432a99f8fde76720e1920f0d7d7115460e762c",
-    "prediction_matrix_manifest.json": "a0ab816c8233e575dbf268a60d6eabd37909ed2c5cd16637c3d1616827a0d79a",
+    "prediction_matrix_manifest.json": "409059a41710e4cb1531a6c2e6f378a3a112ea707182959e728feeddb80a7487",
     "prediction_provenance.json": null
   },
   "reproducible_prediction_matrices": {
@@ -39,7 +39,7 @@
     "committed": false,
     "regenerable": true,
     "gzip_method": "gzip.GzipFile(filename='', mtime=0)",
-    "regenerate_cmd": "python build_prediction_labels.py --labels regime_labels.csv --outdir . --horizons 3,6,12,24,48",
+    "regenerate_cmd": "python stage_b_prediction/scripts/build_prediction_labels.py --labels stage_a_current_regime/outputs/regime_labels.csv --outdir stage_b_prediction/outputs --horizons 3,6,12,24,48",
     "files": {
       "prediction_matrix_h3.csv.gz": {
         "sha256": "362e6ccc058a305b75abdc6606404104036fc88d0dae6a67da45e417272ab50d",
@@ -96,7 +96,7 @@
       "model_version",
       "source_classifier_version"
     ],
-    "regenerate_cmd": "python train_predict_regime.py --features . --outdir . --seed 42 --horizons 3,6,12,24,48",
+    "regenerate_cmd": "python stage_b_prediction/scripts/train_predict_regime.py --features stage_b_prediction/outputs --outdir stage_b_prediction/outputs --seed 42 --horizons 3,6,12,24,48",
     "files": {
       "regime_forecast_h3.csv.gz": {
         "sha256": "5767aa11b4c5050b49ebb226bd593dd1640eda23bb1532e3f499c6e0f754bb3f",

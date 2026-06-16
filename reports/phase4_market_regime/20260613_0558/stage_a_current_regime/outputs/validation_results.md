@@ -1,7 +1,7 @@
 # Validation Results
 
 **OHLCV source:** `/home/vessel/workspace/trading-system/backtestdata/ETHUSDT_futures_5min.csv`
-**Labels file:** `/home/vessel/workspace/CoinTrading/market-regime/reports/phase4_market_regime/20260613_0558/regime_labels.csv`
+**Labels file:** `stage_a_current_regime/outputs/regime_labels.csv`
 **Rows:** 210,528
 
 ## 1. Unit Branch Tests (5 regimes + warmup + boundaries + confidence)

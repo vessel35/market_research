@@ -1,7 +1,8 @@
 # Phase 4 run 20260613_0558 — best-effort pinned dependency set (Python 3.12; tested 3.12.13).
 # Captured from the executing venv via importlib.metadata (the venv is uv-managed; pip freeze
 # unavailable). Recreate:
-#   python3.12 -m venv .venv && . .venv/bin/activate && pip install -r requirements-lock.txt
+#   python3.12 -m venv .venv && . .venv/bin/activate
+#   pip install -r reproducibility/requirements-lock.txt
 #
 # Scope / limits — this is NOT a complete hash-pinned lock:
 #  - Pins the Phase 4 libraries + their key runtime transitive deps, including narwhals

@@ -20,7 +20,11 @@ Inputs (read only): prediction_matrix_h{h}.csv.gz (from build_prediction_labels.
 No Phase 2/3 artifact. No DB. Deterministic (fixed --seed).
 
 Usage:
-  train_predict_regime.py --features . --outdir . --seed 42 --horizons 3,6,12,24,48
+  python stage_b_prediction/scripts/train_predict_regime.py \\
+      --features stage_b_prediction/outputs \\
+      --outdir stage_b_prediction/outputs \\
+      --seed 42 \\
+      --horizons 3,6,12,24,48
 """
 import argparse
 import gzip

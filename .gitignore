@@ -24,3 +24,4 @@ __pycache__/
 # Large regenerable Stage B feature/label intermediates (~72MB) — deterministic via
 # build_prediction_labels.py; full per-class metrics are kept in prediction_metrics.json.
 reports/phase4_market_regime/*/prediction_matrix_*.csv.gz
+reports/phase4_market_regime/*/stage_b_prediction/outputs/prediction_matrix_*.csv.gz

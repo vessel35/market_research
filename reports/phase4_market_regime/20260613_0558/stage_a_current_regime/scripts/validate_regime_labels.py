@@ -5,14 +5,14 @@ and writes validation_results.md (regenerable, not ad-hoc).
 
 CLI
 ---
-  python validate_regime_labels.py \\
+  python stage_a_current_regime/scripts/validate_regime_labels.py \\
       --input  /path/to/ETHUSDT_futures_5min.csv \\
-      --labels /path/to/regime_labels.csv \\
-      --outdir /path/to/run_dir
+      --labels stage_a_current_regime/outputs/regime_labels.csv \\
+      --outdir stage_a_current_regime/outputs
 
 Defaults:
-  --labels : <script dir>/regime_labels.csv
-  --outdir : <script dir>
+  --labels : <stage_a_current_regime>/outputs/regime_labels.csv
+  --outdir : <stage_a_current_regime>/outputs
 
 Tests run (each PASS/FAIL + evidence):
   1. Unit branch tests (5 regimes + warmup + inclusive boundaries + confidence)
@@ -92,13 +92,13 @@ def parse_args():
         "--labels",
         default=None,
         metavar="PATH",
-        help="Path to regime_labels.csv. Defaults to <script dir>/regime_labels.csv.",
+        help="Path to regime_labels.csv. Defaults to <stage_a_current_regime>/outputs/regime_labels.csv.",
     )
     parser.add_argument(
         "--outdir",
         default=None,
         metavar="PATH",
-        help="Output directory for validation_results.md. Defaults to <script dir>.",
+        help="Output directory for validation_results.md. Defaults to <stage_a_current_regime>/outputs.",
     )
     args = parser.parse_args()
     if args.input is None:
@@ -527,9 +527,10 @@ def main():
 
     ohlcv_path = str(args.input)
     script_dir = Path(__file__).resolve().parent
+    default_output_dir = script_dir.parent / "outputs"
 
-    labels_path = Path(args.labels).resolve() if args.labels else (script_dir / "regime_labels.csv")
-    outdir      = Path(args.outdir).resolve() if args.outdir else script_dir
+    labels_path = Path(args.labels).resolve() if args.labels else (default_output_dir / "regime_labels.csv")
+    outdir      = Path(args.outdir).resolve() if args.outdir else default_output_dir
 
     outdir.mkdir(parents=True, exist_ok=True)
 
